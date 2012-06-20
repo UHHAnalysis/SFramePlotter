@@ -120,7 +120,7 @@ int main(int argc, char** argv)
   
   // ____________ do the actual plotting ______________
 
-  plotter->PlotHistosWithRatios(PsFilename);
+  plotter->PlotHistos(PsFilename);
 
   // Done! Exit Root
   gSystem->Exit(0);
