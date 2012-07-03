@@ -359,7 +359,8 @@ void RootPlotter::PlotHistos(const char* psfilename)
       TObject *obj = key->ReadObj();
       
       Int_t Nhists = fNumOfSamples; 
-	
+      Double_t TotMax = 0.;
+
       if ( obj->IsA()->InheritsFrom( TH1::Class() ) ) {
 
 	// first histogram found
@@ -370,6 +371,8 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	// cosmetics
 	Cosmetics(OneDHist, 0);
 	ApplyWeight(OneDHist, 0);
+
+	if (OneDHist->GetMaximum()>TotMax) TotMax = OneDHist->GetMaximum();
 
 	// if there is a lumi yield plot, plot only the first chain
 	if (dirname.Contains("Yield")){
@@ -425,6 +428,8 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    OneDHist = (TH1*) obj;
 	    Cosmetics(OneDHist, ichain);
 	    ApplyWeight(OneDHist, ichain);
+	    if (OneDHist->GetMaximum()>TotMax) TotMax = OneDHist->GetMaximum();
+
 	  } else {
 	    cerr << "Found an object with name " << histname << " in file " << thisdir->GetName() 
 		 << " and directory " << ((TObjString*) dirs->At(i))->GetString() << "." << endl;
@@ -527,6 +532,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    TString hname = hist->GetName();
 	      
 	    OneDHist = GetSliceHisto(hist, jobjhist+1);
+	    if (OneDHist->GetMaximum()>TotMax) TotMax = OneDHist->GetMaximum();
 
 	    TString htitle = hist->GetTitle();
 	    if (ShouldBeStacked(htitle)){
@@ -552,6 +558,10 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	       << ", found " << OneDHistArray->GetEntries() << " different samples, requested were " << fNumOfSamples << endl;
 	  cout << "Skipping histogram." << endl;
 	  continue;
+	}
+	
+	if (StackHist){
+	  if (StackHist->GetMaximum()>TotMax) TotMax = StackHist->GetMaximum();
 	}
 
 	TH1* FirstHist = (TH1*) OneDHistArray->At(0);
@@ -649,7 +659,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  IsLogPlot = true;
 	  gPad->SetLogx(1); 
 	  gPad->SetLogy(1);
-	  FirstHist->SetMaximum(LogScale*FirstHist->GetMaximum());
+	  FirstHist->SetMaximum(LogScale*TotMax);
 	  if (!bShapeNorm){
 	    FirstHist->SetMinimum( 0.3 );
 	  }
@@ -657,7 +667,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	} else if (histname.EndsWith("_ly")) {
 	  IsLogPlot = true;
 	  gPad->SetLogy(1);
-	  FirstHist->SetMaximum(LogScale*FirstHist->GetMaximum());
+	  FirstHist->SetMaximum(LogScale*TotMax);
  	  if (!bShapeNorm){
 	    FirstHist->SetMinimum( 0.3 );
 	  }
@@ -672,7 +682,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  
 	  FirstHist->SetMinimum(0.001);
 	  if (FirstHist->GetMaximum() != 0){
-	    FirstHist->SetMaximum(MaxScale*FirstHist->GetMaximum());
+	    FirstHist->SetMaximum(MaxScale*TotMax);
 	  } else {
 	    FirstHist->SetMaximum(1.0);
 	  }
