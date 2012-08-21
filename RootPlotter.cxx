@@ -23,6 +23,8 @@
 #include <THStack.h>
 #include <TFile.h>
 
+#include "tdrstyle.C"
+
 
 using namespace std;
 
@@ -187,8 +189,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
   // and writes the contents (histograms, hopefully) to a ps file
   // looks for every histogram for the corresponding MC reconstructed
   // histogram and plots it onto the same canvas
-
-
+  
   static Int_t iPageNum = 0;
   Int_t CanWidth;
   Int_t CanHeight;
@@ -210,8 +211,9 @@ void RootPlotter::PlotHistos(const char* psfilename)
   TObjArray* dirs = FindSubdirs(firstdir);
 
   // general appearance and style
-  gROOT->SetStyle("Plain");
-  gStyle->SetOptStat(0);
+  //gROOT->SetStyle("Plain");
+  //gStyle->SetOptStat(0);
+  setTDRStyle();
     
   // set up the canvas
   TCanvas *can = new TCanvas("canvas","Control Plots", CanWidth, CanHeight);
@@ -467,6 +469,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    OneDHistArray->Clear();
 	    for (Int_t j=0; j<TwoDHistArray->GetEntries(); ++j){
 	      TH2D* hist = (TH2D*) TwoDHistArray->At(j);
+	      hist->UseCurrentStyle();
 	      TH1* fractionhist = MakePtFractionHisto(hist);
 	      OneDHistArray->Add(fractionhist);
 	    }
@@ -561,6 +564,17 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	}
 	
 	if (StackHist){
+
+	  //invert the ordering of all histograms in the stack
+	  THStack *StackHist2 = new THStack("stack2","stack2");
+	  TList* histlist = StackHist->GetHists();
+	  for(int i=fNumOfSamplesToStack-1; i>=0; --i){
+	    StackHist2->Add( (TH1*)histlist->At(i));
+	  }
+	  
+	  StackHist = NULL;
+	  StackHist = StackHist2;
+
 	  if (StackHist->GetMaximum()>TotMax) TotMax = StackHist->GetMaximum();
 	}
 
@@ -703,6 +717,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	}
 
 	// draw the histograms
+	FirstHist->UseCurrentStyle();
 	if (FirstHist->GetMarkerStyle() < 2)
 	  FirstHist->Draw("HIST");
 	else 
@@ -720,6 +735,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 
 	// now draw the stack if it exists
 	if (StackHist){
+	  StackHist->UseCurrentStyle();
 	  StackHist->Draw("hist,same");
 	}
 
@@ -731,6 +747,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    if (hist->GetEntries()<1) continue;
 	  }
 	  
+	  //hist->UseCurrentStyle();
 	  if (hist->GetMarkerStyle() == 0){
 	    hist->Draw("HISTsame");
 	  } else {
@@ -738,6 +755,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  }
 	}
 
+	FirstHist->UseCurrentStyle();
 	if (FirstHist->GetMarkerStyle() < 2){
 	  FirstHist->Draw("HISTsame");
 	} else {
@@ -763,8 +781,8 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	if (!bPlotRatio) yfrac = 0.05;
 	Float_t top = 0.92;
 	Float_t ysize = yfrac*fNumOfSamples;
-	Float_t xleft = 0.8;
-	Float_t xright = 0.94;
+	Float_t xleft = 0.6;
+	Float_t xright = 0.92;
 	if (!bPortrait){
 	  top = 0.99;
 	  ysize = 0.07*fNumOfSamples;
@@ -774,27 +792,40 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	
 	TLegend *leg = new TLegend(xleft,top-ysize,xright,top, NULL,"brNDC");
 	Collector->Add(leg);
-	leg->SetFillColor(kWhite);
-	leg->SetLineColor(kWhite);
+	leg->SetFillColor(0);
+	leg->SetLineColor(1);
+	leg->SetBorderSize(0);
+	leg->SetTextFont(42);
+	leg->SetFillStyle(0);
 	for (Int_t i=0; i<fNumOfSamples; ++i){
 	  TString legname = TString::Format("leg_entry_%i",i);
 	  TString legtitle = ((TObjString*) fSampleNames->At(i))->GetName(); 
-	  TLegendEntry* entry = leg->AddEntry(legname, legtitle, "lpf");
-	  entry->SetLineColor(fSampleColors.At(i));
+	  legtitle.ReplaceAll("SPACE", " ");
+	  legtitle.ReplaceAll("[", "{");
+	  legtitle.ReplaceAll("]", "}");
+	  TLegendEntry* entry;
+	  if(fSampleMarkers.At(i)!=0) {
+	    entry = leg->AddEntry(legname, legtitle, "lpf");
+	    entry->SetLineColor(fSampleColors.At(i));
+	  }
+	  else {
+	    entry = leg->AddEntry(legname, legtitle, "f");
+	  }
 	  entry->SetLineWidth(1);
 	  if (fSampleMarkers.At(i)>0){
 	    entry->SetMarkerColor(fSampleColors.At(i));
 	    entry->SetMarkerStyle(fSampleMarkers.At(i));
 	    entry->SetMarkerSize(0.8);
-	    entry->SetLineWidth(2);
+	    //entry->SetLineWidth(2);
 	  } else {
 	    entry->SetMarkerStyle(0);
 	    entry->SetMarkerSize(0);
 	    entry->SetMarkerColor(fSampleColors.At(i));
-	    entry->SetLineWidth(2);
+	    //entry->SetLineWidth(2);
 
 	    // only line
 	    if (fSampleMarkers.At(i)<0){
+	      entry->SetLineWidth(2);
 	      if (fSampleMarkers.At(i)==-1) entry->SetLineStyle(kSolid);
 	      if (fSampleMarkers.At(i)==-2) entry->SetLineStyle(kDotted);
 	      if (fSampleMarkers.At(i)==-3) entry->SetLineStyle(kDashDotted);
@@ -806,7 +837,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    }
 	  }
 	  entry->SetTextAlign(12);
-	  entry->SetTextColor(fSampleColors.At(i));
+	  //entry->SetTextColor(fSampleColors.At(i));
 	}
 	leg->Draw();
         
@@ -1041,6 +1072,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 
 	  // draw them
 	  if (FirstHist->GetEntries() != 0){
+	    tempRatioHist->UseCurrentStyle();
 	    tempRatioHist->Draw("P");
 	    line->Draw("same");
 
@@ -1209,7 +1241,7 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     cerr << "\n\n Cannot set cosmetics for histogram index " << isample << ", because only " << fNumOfSamples << " samples are given." << endl;
     return;
   }
-  
+  hist->UseCurrentStyle();
   hist->SetLineColor(fSampleColors.At(isample));
 
   if (fSampleMarkers.At(isample) > 1 ){
@@ -1221,6 +1253,10 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     hist->SetMarkerSize(0);
     hist->SetMarkerColor(fSampleColors.At(isample));
     hist->SetLineWidth(2);    
+    if(fSampleMarkers.At(isample) >=0 ){
+      hist->SetLineColor(kBlack);
+      hist->SetLineWidth(1); 
+    }
   }
 
   // histogram is transparent if marker < 0  
@@ -1245,6 +1281,8 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     hist->GetYaxis()->SetTitle("#DeltaN/N");
   }
 
+  
+  
   // portrait mode
   if (bPortrait){
     
@@ -1265,7 +1303,8 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     
     
     // landscape mode
-  } else {
+  } 
+  else {
     
     hist->GetYaxis()->SetTitleSize(0.07);
     hist->GetYaxis()->SetLabelSize(0.06);
@@ -1276,7 +1315,7 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     
     hist->GetYaxis()->SetTitleOffset(0.95);
   }
-
+  
   if (!bPlotRatio){
     hist->SetTitle("");
     
@@ -1868,6 +1907,7 @@ void RootPlotter::PlotYields(TH1* hist)
   func->SetLineWidth(2);
   func->SetLineColor(kAzure-2);
   hist->Fit(func, "N");
+  hist->UseCurrentStyle();
   hist->Draw("P ");
   
   Float_t mean = func->GetParameter(0);
