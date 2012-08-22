@@ -50,6 +50,7 @@ RootPlotter::RootPlotter()
   bJetShapesPerSlice = false;
   bSubstractBkgd = false;
   bPlotRatio = false;
+  bDrawLumi = false;
 
 }
 
@@ -781,7 +782,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	if (!bPlotRatio) yfrac = 0.05;
 	Float_t top = 0.92;
 	Float_t ysize = yfrac*fNumOfSamples;
-	Float_t xleft = 0.6;
+	Float_t xleft = 0.65;
 	Float_t xright = 0.92;
 	if (!bPortrait){
 	  top = 0.99;
@@ -892,6 +893,25 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  NumEntries->Draw();
 	}
 
+	if(bDrawLumi){
+	  TLatex *text1 = new TLatex(3.570061,23.08044,"CMS Preliminary");
+	  text1->SetNDC();
+	  text1->SetTextAlign(13);
+	  text1->SetX(0.22);
+	  text1->SetY(0.918);
+	  text1->SetTextFont(42);
+	  text1->SetTextSizePixels(24);
+	  text1->Draw();
+	  
+	  TLatex *text2 = new TLatex(3.570061,23.08044,"5.2 fb^{-1} at #sqrt{s} = 8 TeV");
+	  text2->SetNDC();
+	  text2->SetTextAlign(13);
+	  text2->SetX(0.22);
+	  text2->SetY(0.87);
+	  text2->SetTextFont(42);
+	  text2->SetTextSizePixels(24);
+	  text2->Draw();
+	}
 
 	////////////////////////
 	// draw the ratio     //
@@ -1288,7 +1308,7 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     
     hist->GetYaxis()->SetTitleSize(0.07);
     hist->GetYaxis()->SetLabelSize(0.055);
-    hist->GetYaxis()->SetNdivisions(1005);
+    //hist->GetYaxis()->SetNdivisions(1005);
     hist->GetYaxis()->SetTitleFont(62);
     hist->GetYaxis()->SetLabelFont(62);
     hist->GetYaxis()->SetLabelOffset(0.01);
@@ -1308,7 +1328,7 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     
     hist->GetYaxis()->SetTitleSize(0.07);
     hist->GetYaxis()->SetLabelSize(0.06);
-    hist->GetYaxis()->SetNdivisions(1005);
+    //hist->GetYaxis()->SetNdivisions(1005);
     hist->GetYaxis()->SetTitleFont(62);
     hist->GetYaxis()->SetLabelFont(62);
     hist->GetYaxis()->SetLabelOffset(0.01);
@@ -1330,7 +1350,7 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     hist->GetYaxis()->SetTitleOffset(1.2);
     hist->GetYaxis()->SetTitleSize(0.06);
     hist->GetYaxis()->SetLabelSize(0.045);
-    hist->GetYaxis()->SetNdivisions(210);
+    //hist->GetYaxis()->SetNdivisions(210);
     hist->GetYaxis()->SetTickLength(0.02);
     hist->GetYaxis()->SetLabelFont(62);
     hist->GetYaxis()->SetLabelOffset(0.011);

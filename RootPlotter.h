@@ -9,6 +9,7 @@
 #include <TDirectory.h>
 #include <TCanvas.h>
 #include <TPostScript.h>
+#include <TLatex.h>
 
 class RootPlotter
 {
@@ -53,6 +54,7 @@ public:
     void SetJetShapesPerSlice(Bool_t flag = true){bJetShapesPerSlice = flag;}
     void SetSubstractBkgd(Bool_t flag = true){bSubstractBkgd = flag;}
     void SetPlotRatio(Bool_t flag=true){bPlotRatio = flag;}
+    void SetDrawLumi(Bool_t flag=true){bDrawLumi = flag;}
     
     void SetSampleNames(TObjArray* SampleNames);
     void SetHistColors(TArrayI colors);
@@ -77,6 +79,7 @@ private:
     Bool_t  bShapeNorm;         // use shape normalization
     Bool_t  bPortrait;          // portrait or landscape mode
     Bool_t  bDrawEntries;       // display the number of entries 
+    Bool_t  bDrawLumi;          // display the lumi information 
     Bool_t  bFitPtBalanceHists; // perform fit of Pt-balance histograms?
     Bool_t  bJetShapesPerSlice; // perform fit of Pt-balance histograms?
     Bool_t  bSubstractBkgd;     // substract background from the first chain?

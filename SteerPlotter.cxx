@@ -17,6 +17,7 @@ SteerPlotter::SteerPlotter()
    fOutputPsFile = "Plots/test.ps";
    bSubstractBkgd = false;
    bDrawEntries = false;
+   bDrawLumi = false;
    fNumOfSamplesToStack = 0;
 }
 
@@ -86,6 +87,7 @@ void SteerPlotter::Print(Option_t* option) const
   }
   cout << (bRatioPlot? "Ratios will be plotted." : "No ratios will be plotted") << endl;
   cout << (bDrawEntries? "Number of histogram entries will be plotted." : "Number of histogram entries will not be plotted") << endl;
+  cout << (bDrawLumi? "Lumi inforamtion will be plotted." : "Lumi inforamtion will not be plotted") << endl;
   cout << (bShapeNorm? "Shape normalization" : "No shape normalization") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
   cout << (bPortrait?  "Setting the page to portrait mode" : "Setting the page to landscape mode") << endl;
@@ -110,6 +112,9 @@ Bool_t SteerPlotter::GetFitPtBalanceHists(){return bFitPtBalanceHists;}
 
 void SteerPlotter::SetDrawEntries(Bool_t flag){bDrawEntries = flag;}
 Bool_t SteerPlotter::GetDrawEntries(){return bDrawEntries;}
+
+void SteerPlotter::SetDrawLumi(Bool_t flag){bDrawLumi = flag;}
+Bool_t SteerPlotter::GetDrawLumi(){return bDrawLumi;}
 
 void SteerPlotter::SetJetShapesPerSlice(Bool_t flag){bJetShapesPerSlice = flag;}
 Bool_t SteerPlotter::GetJetShapesPerSlice(){return bJetShapesPerSlice;}

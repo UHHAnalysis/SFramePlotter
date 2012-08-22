@@ -93,7 +93,7 @@ int main(int argc, char** argv)
   TArrayI HistColors         = steerfile->GetHistColors();
   TArrayI HistMarkers        = steerfile->GetHistMarkers();
   TArrayF SamplesWeight      = steerfile->GetSamplesWeight();
-
+  Bool_t DrawLumi            = steerfile->GetDrawLumi();
 
   
   // ____________ set up the plotter ______________
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
   plotter->SetSamplesToStack(SamplesToStack);
   plotter->SetSamplesWeight(SamplesWeight);
   plotter->SetPlotRatio(RatioPlot);
-  
+  plotter->SetDrawLumi(DrawLumi); 
   
   // ____________ do the actual plotting ______________
 

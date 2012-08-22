@@ -68,6 +68,9 @@ public:
     void SetSubstractBkgd(Bool_t flag);
     Bool_t GetSubstractBkgd();
 
+    void SetDrawLumi(Bool_t flag);
+    Bool_t GetDrawLumi();
+
 
 private:
 
@@ -76,6 +79,7 @@ private:
     Bool_t    bRatioPlot;         // plot ratios?
     Bool_t    bPortrait;          // portrait or landscape 
     Bool_t    bDrawEntries;       // draw the number of entries?
+    Bool_t    bDrawLumi;          // draw the lumi information?
     Bool_t    bFitPtBalanceHists; // fit Pt-balance histograms?
     Bool_t    bJetShapesPerSlice; // plot each slide of the jet shape histograms?
     Int_t     fNumOfSamples;      // how many analysis samples should be plotted
