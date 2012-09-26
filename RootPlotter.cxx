@@ -88,14 +88,21 @@ void RootPlotter::OpenRootFiles(TObjArray* filenames, const char* cyclename)
       name = target;
     }
 
+    //cout << "Opening file with name " << name << "..." << endl;
     fRootfiles[i] = new TFile(name, "READ");
-  
+    //cout << "... success! pointer = " << fRootfiles[i] << endl;
+    //cout << "name = " << fRootfiles[i]->GetName() << endl;
+    //fRootfiles[i]->ls();
+    
+    //cout << " is open? " << fRootfiles[i]->IsOpen() << endl;
+    
     if (!fRootfiles[i]->IsOpen()) {
       cout << endl << "RootPlotter: File " << name << " does not exist!!!" << endl;
       exit(EXIT_FAILURE);
     } else { // success!
       cout << "RootPlotter: Successfully opened file " << name << endl;
     }
+
   }
   cout << "-----------------------------------------------------------------------------------" << endl << endl;
   return;
@@ -190,7 +197,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
   // and writes the contents (histograms, hopefully) to a ps file
   // looks for every histogram for the corresponding MC reconstructed
   // histogram and plots it onto the same canvas
-  
+
   static Int_t iPageNum = 0;
   Int_t CanWidth;
   Int_t CanHeight;
@@ -201,20 +208,49 @@ void RootPlotter::PlotHistos(const char* psfilename)
     CanWidth =  800;
     CanHeight = 600;
   }
-
+ 
   if (fNumOfSamples < 2){
     cout << "Cannot plot ratio histograms with " << fNumOfSamples << " chain(s). If you want to draw one chain only, use PlotHistosWithoutRatios." << endl;
     exit(EXIT_FAILURE);
   }
-
+ 
   // find all subdirectories (former histogram collections) in the first file
   TDirectory* firstdir = (TDirectory*) fRootfiles[0];
   TObjArray* dirs = FindSubdirs(firstdir);
 
   // general appearance and style
-  //gROOT->SetStyle("Plain");
-  //gStyle->SetOptStat(0);
-  setTDRStyle();
+  gROOT->SetStyle("Plain");
+  gStyle->SetOptStat(0);
+  gStyle -> SetPadTickX(1);
+  gStyle -> SetPadTickY(1);
+
+  gStyle->SetPadBorderMode(0);
+  gStyle->SetPadColor(kWhite);
+  gStyle->SetPadGridX(false);
+  gStyle->SetPadGridY(false);
+  gStyle->SetGridColor(0);
+  gStyle->SetGridStyle(3);
+  gStyle->SetGridWidth(1);
+
+  gStyle->SetFrameBorderMode(0);
+  gStyle->SetFrameBorderSize(1);
+  gStyle->SetFrameFillColor(0);
+  gStyle->SetFrameFillStyle(0);
+  gStyle->SetFrameLineColor(1);
+  gStyle->SetFrameLineStyle(1);
+  gStyle->SetFrameLineWidth(1);
+
+  gStyle->SetTitleFont(42, "XYZ");
+  gStyle->SetLabelFont(42, "XYZ");
+
+  gStyle->SetAxisColor(1, "XYZ");
+  gStyle->SetStripDecimals(kTRUE);
+  gStyle->SetTickLength(0.03, "XYZ");
+  gStyle->SetNdivisions(510, "XYZ");
+
+  gStyle->UseCurrentStyle();
+
+
     
   // set up the canvas
   TCanvas *can = new TCanvas("canvas","Control Plots", CanWidth, CanHeight);
@@ -257,16 +293,16 @@ void RootPlotter::PlotHistos(const char* psfilename)
     pad2 = new TPad("pad2", "Control Plots 2", x1, y1, x2, y3);
 
   }
-
+ 
   // set margins for portrait mode
   if (bPortrait){
 
-    pad1->SetTopMargin(0.05); pad1->SetBottomMargin(0.13);  pad1->SetLeftMargin(0.19); pad1->SetRightMargin(0.05);
-    pad2->SetTopMargin(0.05); pad2->SetBottomMargin(0.13);  pad2->SetLeftMargin(0.19); pad2->SetRightMargin(0.05);
+    pad1->SetTopMargin(0.07); pad1->SetBottomMargin(0.13);  pad1->SetLeftMargin(0.19); pad1->SetRightMargin(0.05);
+    pad2->SetTopMargin(0.07); pad2->SetBottomMargin(0.13);  pad2->SetLeftMargin(0.19); pad2->SetRightMargin(0.05);
     
     if (bPlotRatio){
-      pad1->SetTopMargin(0.05); pad1->SetBottomMargin(0.0);  pad1->SetLeftMargin(0.19); pad1->SetRightMargin(0.05);
-      pad2->SetTopMargin(0.05); pad2->SetBottomMargin(0.0);  pad2->SetLeftMargin(0.19); pad2->SetRightMargin(0.05);
+      pad1->SetTopMargin(0.07); pad1->SetBottomMargin(0.0);  pad1->SetLeftMargin(0.19); pad1->SetRightMargin(0.05);
+      pad2->SetTopMargin(0.07); pad2->SetBottomMargin(0.0);  pad2->SetLeftMargin(0.19); pad2->SetRightMargin(0.05);
       rp1->SetTopMargin(0.0);    rp1->SetBottomMargin(0.33);  rp1->SetLeftMargin(0.19);  rp1->SetRightMargin(0.05);
       rp2->SetTopMargin(0.0);    rp2->SetBottomMargin(0.33);  rp2->SetLeftMargin(0.19);  rp2->SetRightMargin(0.05);
     }
@@ -290,7 +326,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
     rp1->Draw();
     rp2->Draw();
   }
-
+ 
   Int_t ihist = 0; // histogram index
   TObjArray* OneDHistArray = new TObjArray();
   TH1* OneDHist = NULL;
@@ -340,25 +376,30 @@ void RootPlotter::PlotHistos(const char* psfilename)
     filename.Append(dirname);
     filename.Append(".ps");
     PSFile = MakeNewPsFile(filename);
-
+    
     // make a page title
     can->cd();
     //TPaveText* pagetitle = new TPaveText(0.2,0.97,0.8,1.0, "NDC");
     //pagetitle->SetBorderSize(0);
     //pagetitle->SetFillColor(0);
     //pagetitle->AddText(((TObjString*) dirs->At(i))->GetString());
-    //pagetitle->SetTextFont(62);
+    //pagetitle->SetTextFont(42);
     //pagetitle->SetTextColor(kBlack);
     //pagetitle->SetTextSize(0.05);
     //pagetitle->Draw();
 
     firstdir->cd();
     gDirectory->Cd(((TObjString*) dirs->At(i))->GetString());
-  
+
+    Float_t TotMax = 0;
+    
     // loop over all histograms in the directory and plot them
     TKey *key;
     TIter nextkey( gDirectory->GetListOfKeys() );
     while ( (key = (TKey*)nextkey())) {
+
+      TotMax = 0;
+
       TObject *obj = key->ReadObj();
       
       Int_t Nhists = fNumOfSamples; 
@@ -370,6 +411,10 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	OneDHist = (TH1*) obj;
 	TString histname(OneDHist->GetName());
 	TString oldchainname(((TObjString*) fSampleNames->At(0))->GetName());
+
+	if (OneDHist->GetMaximum()>TotMax){
+	  TotMax = OneDHist->GetMaximum();
+	}
 
 	// cosmetics
 	Cosmetics(OneDHist, 0);
@@ -413,11 +458,11 @@ void RootPlotter::PlotHistos(const char* psfilename)
 
 	// find the same histogram for the other samples
 	for (Int_t ichain=1; ichain<fNumOfSamples; ++ichain){
-
-	  TDirectory* thisdir = fRootfiles[ichain];	  
+	  TFile* thisdir = fRootfiles[ichain];	  
 	  thisdir->cd();
 	  gDirectory->Cd(((TObjString*) dirs->At(i))->GetString());
-	    
+
+ 
 	  // get the right histogram
 	  OneDHist = NULL;
 	  TObject* obj = gDirectory->Get(histname);
@@ -470,7 +515,6 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    OneDHistArray->Clear();
 	    for (Int_t j=0; j<TwoDHistArray->GetEntries(); ++j){
 	      TH2D* hist = (TH2D*) TwoDHistArray->At(j);
-	      hist->UseCurrentStyle();
 	      TH1* fractionhist = MakePtFractionHisto(hist);
 	      OneDHistArray->Add(fractionhist);
 	    }
@@ -512,7 +556,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	OneDHistArray->Clear();
 	continue;
       }
-      
+
 
       // loop over the histograms that should be plotted per canvas
       for (Int_t jobjhist=0; jobjhist<NumHistosPerObject; ++jobjhist){
@@ -609,13 +653,21 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	case 1:  pad2->cd(); break;
 	default: break;	
 	}
-      
+     
 	gPad->SetLogx(0);
 	gPad->SetLogy(0);
 
 	/*------------------------------------------------------------------\
 	| DRAW THE HISTOGRAMS AS WELL AS THE RATIOS                         |
 	\------------------------------------------------------------------*/
+
+	if (StackHist){
+	  TList* list = StackHist->GetHists();
+	  TH1* hist = (TH1*) list->At(list->GetEntries()-1);
+	  if (hist->GetMaximum()>TotMax){
+	    TotMax = hist->GetMaximum();	
+	  }
+	}
 
 
 	//////////////////////////////////////
@@ -634,7 +686,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    ShapeNormalize(StackHist);	    
 	  }
 	}	  
-	
+
 	// if the first hist has no entries, then take the second one
 	if (FirstHist->GetEntries()==0){
 	  FirstHist = (TH1*) OneDHistArray->At(1);
@@ -674,21 +726,23 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  IsLogPlot = true;
 	  gPad->SetLogx(1); 
 	  gPad->SetLogy(1);
-	  FirstHist->SetMaximum(LogScale*TotMax);
-	  if (!bShapeNorm){
-	    FirstHist->SetMinimum( 0.3 );
+	  if (TotMax>0){
+	    FirstHist->SetMaximum(LogScale*TotMax);
 	  }
-	  FirstHist->GetYaxis()->SetTitleOffset(1.2);
+	  if (!bShapeNorm){
+	    //FirstHist->SetMinimum( 0.3 );
+	  }
 	} else if (histname.EndsWith("_ly")) {
 	  IsLogPlot = true;
 	  gPad->SetLogy(1);
-	  FirstHist->SetMaximum(LogScale*TotMax);
- 	  if (!bShapeNorm){
-	    FirstHist->SetMinimum( 0.3 );
+	  if (TotMax>0){
+	    FirstHist->SetMaximum(LogScale*TotMax);
 	  }
-	  FirstHist->GetYaxis()->SetTitleOffset(1.2);
+ 	  if (!bShapeNorm){
+	    //FirstHist->SetMinimum( 0.3 );
+	  }
 
-	  // no log-y
+	// no log-y
 	} else { 
 	  
 	  if (histname.EndsWith("_lx")){
@@ -696,10 +750,12 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  }
 	  
 	  FirstHist->SetMinimum(0.001);
-	  if (FirstHist->GetMaximum() != 0){
-	    FirstHist->SetMaximum(MaxScale*TotMax);
-	  } else {
-	    FirstHist->SetMaximum(1.0);
+	  if (TotMax>0){
+	    if (FirstHist->GetMaximum() != 0){
+	      FirstHist->SetMaximum(MaxScale*TotMax);
+	    } else {
+	      FirstHist->SetMaximum(TotMax);
+	    }
 	  }
 	}
 
@@ -718,11 +774,11 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	}
 
 	// draw the histograms
-	FirstHist->UseCurrentStyle();
-	if (FirstHist->GetMarkerStyle() < 2)
+	if (FirstHist->GetMarkerStyle() < 2){
 	  FirstHist->Draw("HIST");
-	else 
-	  FirstHist->Draw("P ");
+	} else {
+	  FirstHist->Draw("P");
+	}
 	
 	// draw background if requested
 	/*
@@ -736,7 +792,6 @@ void RootPlotter::PlotHistos(const char* psfilename)
 
 	// now draw the stack if it exists
 	if (StackHist){
-	  StackHist->UseCurrentStyle();
 	  StackHist->Draw("hist,same");
 	}
 
@@ -748,7 +803,6 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    if (hist->GetEntries()<1) continue;
 	  }
 	  
-	  //hist->UseCurrentStyle();
 	  if (hist->GetMarkerStyle() == 0){
 	    hist->Draw("HISTsame");
 	  } else {
@@ -756,7 +810,6 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  }
 	}
 
-	FirstHist->UseCurrentStyle();
 	if (FirstHist->GetMarkerStyle() < 2){
 	  FirstHist->Draw("HISTsame");
 	} else {
@@ -804,13 +857,14 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  legtitle.ReplaceAll("SPACE", " ");
 	  legtitle.ReplaceAll("[", "{");
 	  legtitle.ReplaceAll("]", "}");
-	  TLegendEntry* entry;
+	  TLegendEntry* entry = NULL;
 	  if(fSampleMarkers.At(i)!=0) {
 	    entry = leg->AddEntry(legname, legtitle, "lpf");
 	    entry->SetLineColor(fSampleColors.At(i));
-	  }
-	  else {
+	  } else if (fSampleMarkers.At(i)==0) {
 	    entry = leg->AddEntry(legname, legtitle, "f");
+	  } else if (fSampleMarkers.At(i)<0) {
+	    entry = leg->AddEntry(legname, legtitle, "l");
 	  }
 	  entry->SetLineWidth(1);
 	  if (fSampleMarkers.At(i)>0){
@@ -1010,27 +1064,13 @@ void RootPlotter::PlotHistos(const char* psfilename)
 
 	  tempRatioHist = (TH1D*)RatioHistArray->At(0);
 	
-	
-	  //if( RatioHistArray->GetEntries() == 1){
-	  //  TString ratiotitle = ((TObjString*) fSampleNames->At(0))->GetName();
-	  //  ratiotitle.Append("/");
-	  //  
-	  //  TString denom = ((TObjString*) fSampleNames->At(1))->GetName(); 
-	  //  ratiotitle.Append( denom );
-	  //  ((TH1D*)RatioHistArray->At(0))->GetYaxis()->SetTitle(ratiotitle);
-	  //
-	  //} else {
-	
 	  TString ratiotitle = ((TObjString*) fSampleNames->At(0))->GetName();
 	  ratiotitle.Append(" / MC");	  
 	  ((TH1D*)RatioHistArray->At(0))->GetYaxis()->SetTitle(ratiotitle);
  	
-
 	  if (histname.EndsWith("_lxy") || histname.EndsWith("_lx")){
 	    gPad->SetLogx(1);
 	  }
-
-
 
 
 	  // cosmetics for portrait mode 
@@ -1045,15 +1085,15 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    tempRatioHist->GetXaxis()->SetTickLength(0.07);
 	    tempRatioHist->GetXaxis()->SetTitleSize(0.13);
 	    tempRatioHist->GetXaxis()->SetTitleOffset(1.3);
-	    tempRatioHist->GetXaxis()->SetLabelFont(62);
-	    tempRatioHist->GetXaxis()->SetTitleFont(62);
+	    tempRatioHist->GetXaxis()->SetLabelFont(42);
+	    tempRatioHist->GetXaxis()->SetTitleFont(42);
 	  
 	    tempRatioHist->GetYaxis()->CenterTitle();
 	    tempRatioHist->GetYaxis()->SetTitleSize(0.13);
-	    tempRatioHist->GetYaxis()->SetLabelSize(0.09);
+	    tempRatioHist->GetYaxis()->SetLabelSize(0.12);
 	    tempRatioHist->GetYaxis()->SetNdivisions(210);
 	    tempRatioHist->GetYaxis()->SetTickLength(0.02);
-	    tempRatioHist->GetYaxis()->SetLabelFont(62);
+	    tempRatioHist->GetYaxis()->SetLabelFont(42);
 	    tempRatioHist->GetYaxis()->SetLabelOffset(0.011);
 
 	    if (histname.Contains("ElecCalib")){
@@ -1072,14 +1112,14 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	    tempRatioHist->GetXaxis()->SetLabelSize(0.14);
 	    tempRatioHist->GetXaxis()->SetTickLength(0.07);
 	    tempRatioHist->GetXaxis()->SetTitleSize(0.15);
-	    tempRatioHist->GetXaxis()->SetLabelFont(62);
+	    tempRatioHist->GetXaxis()->SetLabelFont(42);
 	  
 	    tempRatioHist->GetYaxis()->CenterTitle();
 	    tempRatioHist->GetYaxis()->SetTitleSize(0.11);
 	    tempRatioHist->GetYaxis()->SetLabelSize(0.12);
 	    tempRatioHist->GetYaxis()->SetNdivisions(505);
 	    tempRatioHist->GetYaxis()->SetTickLength(0.03);
-	    tempRatioHist->GetYaxis()->SetLabelFont(62);
+	    tempRatioHist->GetYaxis()->SetLabelFont(42);
 	  
 	  }
 
@@ -1092,7 +1132,6 @@ void RootPlotter::PlotHistos(const char* psfilename)
 
 	  // draw them
 	  if (FirstHist->GetEntries() != 0){
-	    tempRatioHist->UseCurrentStyle();
 	    tempRatioHist->Draw("P");
 	    line->Draw("same");
 
@@ -1234,7 +1273,7 @@ void RootPlotter::ApplyWeight(TH1* hist, Int_t isample)
     cerr << "\n\n Cannot apply weight for histogram index " << isample << ", because only " << fNumOfSamples << " samples are given." << endl;
     return;
   }
-  
+
   hist->Scale(fSamplesWeight.At(isample));
 
   return;
@@ -1261,9 +1300,9 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     cerr << "\n\n Cannot set cosmetics for histogram index " << isample << ", because only " << fNumOfSamples << " samples are given." << endl;
     return;
   }
-  hist->UseCurrentStyle();
   hist->SetLineColor(fSampleColors.At(isample));
 
+  
   if (fSampleMarkers.At(isample) > 1 ){
     hist->SetMarkerStyle(fSampleMarkers.At(isample));
     hist->SetMarkerColor(fSampleColors.At(isample));
@@ -1272,11 +1311,11 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     hist->SetMarkerStyle(0);
     hist->SetMarkerSize(0);
     hist->SetMarkerColor(fSampleColors.At(isample));
-    hist->SetLineWidth(2);    
-    if(fSampleMarkers.At(isample) >=0 ){
-      hist->SetLineColor(kBlack);
-      hist->SetLineWidth(1); 
-    }
+    hist->SetLineWidth(2);   
+    //    if(fSampleMarkers.At(isample) >=0 ){
+    //      hist->SetLineColor(fSampleColors.At(isample));
+    //      hist->SetLineWidth(1); 
+    //    }
   }
 
   // histogram is transparent if marker < 0  
@@ -1307,14 +1346,13 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
   if (bPortrait){
     
     hist->GetYaxis()->SetTitleSize(0.07);
-    hist->GetYaxis()->SetLabelSize(0.055);
+    hist->GetYaxis()->SetLabelSize(0.06);
     //hist->GetYaxis()->SetNdivisions(1005);
-    hist->GetYaxis()->SetTitleFont(62);
-    hist->GetYaxis()->SetLabelFont(62);
+    hist->GetYaxis()->SetTitleFont(42);
+    hist->GetYaxis()->SetLabelFont(42);
     hist->GetYaxis()->SetLabelOffset(0.01);
     
     hist->GetYaxis()->SetTitleOffset(0.8);
-
     hist->GetYaxis()->SetTickLength(0.02);
     
     // move the y-axis title depending on the number of entries
@@ -1329,8 +1367,8 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     hist->GetYaxis()->SetTitleSize(0.07);
     hist->GetYaxis()->SetLabelSize(0.06);
     //hist->GetYaxis()->SetNdivisions(1005);
-    hist->GetYaxis()->SetTitleFont(62);
-    hist->GetYaxis()->SetLabelFont(62);
+    hist->GetYaxis()->SetTitleFont(42);
+    hist->GetYaxis()->SetLabelFont(42);
     hist->GetYaxis()->SetLabelOffset(0.01);
     
     hist->GetYaxis()->SetTitleOffset(0.95);
@@ -1344,18 +1382,19 @@ void RootPlotter::Cosmetics(TH1* hist, Int_t isample)
     hist->GetXaxis()->SetTickLength(0.03);
     hist->GetXaxis()->SetTitleSize(0.05);
     hist->GetXaxis()->SetTitleOffset(1.2);
-    hist->GetXaxis()->SetLabelFont(62);
-    hist->GetXaxis()->SetTitleFont(62);
+    hist->GetXaxis()->SetLabelFont(42);
+    hist->GetXaxis()->SetTitleFont(42);
     
     hist->GetYaxis()->SetTitleOffset(1.2);
     hist->GetYaxis()->SetTitleSize(0.06);
     hist->GetYaxis()->SetLabelSize(0.045);
     //hist->GetYaxis()->SetNdivisions(210);
     hist->GetYaxis()->SetTickLength(0.02);
-    hist->GetYaxis()->SetLabelFont(62);
+    hist->GetYaxis()->SetLabelFont(42);
     hist->GetYaxis()->SetLabelOffset(0.011);
   }
   
+
   return;
 
 }
@@ -1558,8 +1597,8 @@ TObjArray* RootPlotter::FindSubdirs(TDirectory* dir)
 {
   // find all subdirectories (former histogram collections) in the input directory
   // return a TObjArray with the names of the subdirectories 
-
   dir->cd();
+
   TObjArray* subdirnames = new TObjArray();
   TKey *key;
   TIter nextkey( gDirectory->GetListOfKeys() );
@@ -1927,7 +1966,6 @@ void RootPlotter::PlotYields(TH1* hist)
   func->SetLineWidth(2);
   func->SetLineColor(kAzure-2);
   hist->Fit(func, "N");
-  hist->UseCurrentStyle();
   hist->Draw("P ");
   
   Float_t mean = func->GetParameter(0);
