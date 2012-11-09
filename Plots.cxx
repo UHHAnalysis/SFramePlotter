@@ -19,16 +19,22 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstdlib>
 
 #include <TROOT.h>
 #include <TH1.h>
 #include <TRint.h>
 #include <TSystem.h>
 #include <TStyle.h>
+#include <TObjString.h>
 
 #include "SteerParser.h"
 #include "SteerPlotter.h"
 #include "RootPlotter.h"
+#include "FileParser.h"
+#include "SHist.h"
+#include "SPlotter.h"
+
 
 using namespace std;
 
@@ -94,10 +100,47 @@ int main(int argc, char** argv)
   TArrayI HistMarkers        = steerfile->GetHistMarkers();
   TArrayF SamplesWeight      = steerfile->GetSamplesWeight();
   Bool_t DrawLumi            = steerfile->GetDrawLumi();
+  Bool_t DrawLegend          = steerfile->GetDrawLegend();
 
+  // _______________ loop over files and get all histograms ______________
+
+  FileParser fp;
+  //fp.SetDebug();
+  vector<TObjArray*> harr;
+  for (int i=0; i<InputFilenames->GetEntries(); ++i){
+    TString file = ((TObjString*)InputFilenames->At(i))->GetString();
+    TString legname = ((TObjString*)SampleNames->At(i))->GetString();
+    fp.OpenFile(file, CycleName);
+    fp.BrowseFile();
+    fp.SetInfo(legname, SamplesWeight[i], HistColors[i], HistMarkers[i]);
+    fp.CloseFile();
+    harr.push_back( fp.GetHists() );
+  }
+
+  // _______________ stack histograms ______________
+  
+  SPlotter pl;
+  //pl.SetDebug();
+  pl.DoStacking(harr, SamplesToStack);
   
   // ____________ set up the plotter ______________
+
+  pl.SetShapeNorm(ShapeNorm);
+  pl.SetPortraitMode(PortraitMode);
+  pl.SetDrawEntries(DrawEntries);
+  pl.SetPlotRatio(RatioPlot);
+  pl.SetDrawLumi(DrawLumi); 
+  pl.SetDrawLegend(DrawLegend);
+  pl.SetPsFilename(PsFilename);
+
   
+  // _______________ do the plotting ______________
+  
+  pl.ProcessAndPlot(harr);
+
+  exit(1);
+
+  /*
   RootPlotter* plotter = new RootPlotter();
   if (CycleName.Length()>0){
     plotter->OpenRootFiles(InputFilenames, CycleName);
@@ -121,11 +164,10 @@ int main(int argc, char** argv)
   // ____________ do the actual plotting ______________
 
   plotter->PlotHistos(PsFilename);
+  */
 
   // Done! Exit Root
   gSystem->Exit(0);
-
-  theApp.Run(kTRUE);
 
   return 0;
 }

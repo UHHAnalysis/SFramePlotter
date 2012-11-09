@@ -1,4 +1,4 @@
-ARCH_LOC_1 := $(wildcard $(shell root-config --prefix)/test/Makefile.arch)
+.ARCH_LOC_1 := $(wildcard $(shell root-config --prefix)/test/Makefile.arch)
 ARCH_LOC_2 := $(wildcard $(shell root-config --prefix)/share/root/test/Makefile.arch)
 ARCH_LOC_3 := $(wildcard $(shell root-config --prefix)/share/doc/root/test/Makefile.arch)
 ARCH_LOC_4 := $(wildcard $(shell root-config --prefix)/etc/Makefile.arch)
@@ -30,7 +30,7 @@ else
   endif
 endif
 
-DIR	= .
+DIR = .
 
 BINDIR       = $(DIR)/bin
 TMPDIR       = $(DIR)/tmp
@@ -38,15 +38,21 @@ TMPDIR       = $(DIR)/tmp
 ROOTLIBS     = $(shell $(ROOTSYS)/bin/root-config --libs)
 
 OBJS         = $(TMPDIR)/Plots.o
-OBJS         += $(TMPDIR)/RootPlotter.o
+#OBJS         += $(TMPDIR)/RootPlotter.o
 OBJS         += $(TMPDIR)/SteerPlotter.o
 OBJS         += $(TMPDIR)/SteerParser.o
 OBJS         += $(TMPDIR)/BaseSteer.o
 OBJS         += $(TMPDIR)/SteerPlotter_Dict.o
 OBJS         += $(TMPDIR)/BaseSteer_Dict.o
 
+OBJS         += $(TMPDIR)/SHist.o
+OBJS         += $(TMPDIR)/SHist_Dict.o
+OBJS         += $(TMPDIR)/SPlotter.o
+OBJS         += $(TMPDIR)/FileParser.o
+
 DICTFILE     = SteerPlotter_Dict.cxx
 DICTFILE     += BaseSteer_Dict.cxx
+DICTFILE     += SHist_Dict.cxx
 
 
 all: setup Plots

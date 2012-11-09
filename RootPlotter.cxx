@@ -209,10 +209,6 @@ void RootPlotter::PlotHistos(const char* psfilename)
     CanHeight = 600;
   }
  
-  if (fNumOfSamples < 2){
-    cout << "Cannot plot ratio histograms with " << fNumOfSamples << " chain(s). If you want to draw one chain only, use PlotHistosWithoutRatios." << endl;
-    exit(EXIT_FAILURE);
-  }
  
   // find all subdirectories (former histogram collections) in the first file
   TDirectory* firstdir = (TDirectory*) fRootfiles[0];
@@ -391,17 +387,17 @@ void RootPlotter::PlotHistos(const char* psfilename)
     firstdir->cd();
     gDirectory->Cd(((TObjString*) dirs->At(i))->GetString());
 
-    Float_t TotMax = 0;
+    Float_t TotMax = 1;
     
     // loop over all histograms in the directory and plot them
     TKey *key;
     TIter nextkey( gDirectory->GetListOfKeys() );
     while ( (key = (TKey*)nextkey())) {
 
-      TotMax = 0;
+      TotMax = 1;
 
       TObject *obj = key->ReadObj();
-      
+
       Int_t Nhists = fNumOfSamples; 
       Double_t TotMax = 0.;
 
@@ -458,6 +454,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 
 	// find the same histogram for the other samples
 	for (Int_t ichain=1; ichain<fNumOfSamples; ++ichain){
+
 	  TFile* thisdir = fRootfiles[ichain];	  
 	  thisdir->cd();
 	  gDirectory->Cd(((TObjString*) dirs->At(i))->GetString());
@@ -626,6 +623,8 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	TH1* FirstHist = (TH1*) OneDHistArray->At(0);
 	TString histname(FirstHist->GetName());
 	
+	cout << "ihist = " << ihist << " histname = " << histname << endl;
+
 	// set up the canvas
 	if (ihist%2==0){
 
@@ -637,7 +636,7 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	  can->Update();
 	  PSFile->NewPage();
 
-	  // clean up
+	  // clean up	 
 	  if (ihist!=0){
 	    can->Clear("D");
 	    for (Int_t i=0;i<Collector->GetEntries();++i){
@@ -645,7 +644,8 @@ void RootPlotter::PlotHistos(const char* psfilename)
 	      delete obj;
 	    }
 	    Collector->Clear();
-	  }
+	  }	  
+
 	}
 
 	switch (ihist%2){

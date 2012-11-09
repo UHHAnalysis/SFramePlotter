@@ -18,6 +18,7 @@ SteerPlotter::SteerPlotter()
    bSubstractBkgd = false;
    bDrawEntries = false;
    bDrawLumi = false;
+   bDrawLegend = true;
    fNumOfSamplesToStack = 0;
 }
 
@@ -26,9 +27,9 @@ SteerPlotter::~SteerPlotter()
    fLegStrings.Delete();
 }
 
-void SteerPlotter::Print(Option_t* option) const
+void SteerPlotter::Print(Option_t* opt) const
 {
-  // Prints all settings of the steering
+  // Prints all settings of the steering  
 
   // First: perform some sanity checks
   if (fNumOfSamples != fInputFiles.GetEntries()){
@@ -54,7 +55,7 @@ void SteerPlotter::Print(Option_t* option) const
 
 
   cout << endl;
-  cout << "-------------------------------------------------------- SteerPlotter -----------------------------------------------" << endl;
+  cout << "-------------------------------------------------------- SteerPlotter " << opt << "-----------------------------------------------" << endl;
 
   cout << "Number of analysis samples to be plotted: " << fNumOfSamples << endl;
   if (fCycleName.Length()>0){
@@ -88,6 +89,7 @@ void SteerPlotter::Print(Option_t* option) const
   cout << (bRatioPlot? "Ratios will be plotted." : "No ratios will be plotted") << endl;
   cout << (bDrawEntries? "Number of histogram entries will be plotted." : "Number of histogram entries will not be plotted") << endl;
   cout << (bDrawLumi? "Lumi inforamtion will be plotted." : "Lumi inforamtion will not be plotted") << endl;
+  cout << (bDrawLegend? "Legend will be plotted everywhere." : "Legend will be plotted on first plot only") << endl;
   cout << (bShapeNorm? "Shape normalization" : "No shape normalization") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
   cout << (bPortrait?  "Setting the page to portrait mode" : "Setting the page to landscape mode") << endl;
@@ -115,6 +117,9 @@ Bool_t SteerPlotter::GetDrawEntries(){return bDrawEntries;}
 
 void SteerPlotter::SetDrawLumi(Bool_t flag){bDrawLumi = flag;}
 Bool_t SteerPlotter::GetDrawLumi(){return bDrawLumi;}
+
+void SteerPlotter::SetDrawLegend(Bool_t flag){bDrawLegend = flag;}
+Bool_t SteerPlotter::GetDrawLegend(){return bDrawLegend;}
 
 void SteerPlotter::SetJetShapesPerSlice(Bool_t flag){bJetShapesPerSlice = flag;}
 Bool_t SteerPlotter::GetJetShapesPerSlice(){return bJetShapesPerSlice;}
