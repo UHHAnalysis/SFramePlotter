@@ -861,6 +861,14 @@ vector<SHist*> SPlotter::GetPlottableHists(std::vector<TObjArray*> histarr, int 
     return hists;
   }
 
+  TString name = hist->GetName();
+  TString process = hist->GetProcessName();
+  if (process.Contains("data",TString::kIgnoreCase) 
+      && name.Contains("_perlumibin", TString::kIgnoreCase)){
+    hists.push_back(hist);
+    return hists;
+  }
+
   if (hist->DoDraw()){ // take first hist
     hists.push_back(hist);
     gotstack = false;
