@@ -100,6 +100,7 @@ int main(int argc, char** argv)
   TArrayI HistMarkers        = steerfile->GetHistMarkers();
   TArrayF SamplesWeight      = steerfile->GetSamplesWeight();
   Bool_t DrawLumi            = steerfile->GetDrawLumi();
+  Float_t Lumi               = steerfile->GetLumi();
   Bool_t DrawLegend          = steerfile->GetDrawLegend();
 
   // _______________ loop over files and get all histograms ______________
@@ -132,7 +133,7 @@ int main(int argc, char** argv)
   pl.SetDrawLumi(DrawLumi); 
   pl.SetDrawLegend(DrawLegend);
   pl.SetPsFilename(PsFilename);
-
+  pl.SetLumi(Lumi);
   
   // _______________ do the plotting ______________
   

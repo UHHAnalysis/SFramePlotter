@@ -25,6 +25,7 @@ class SPlotter
   std::vector<SHist*> GetHistsAtIndex(std::vector<TObjArray*> histarr, int index);
   void PlotHists(std::vector<SHist*> hists, int ipad);
   void PlotRatios(std::vector<SHist*> hists, int ipad);
+  void PlotLumiYield(SHist* hist, int ipad);
 
   // collect all histograms
   void DoStacking(std::vector<TObjArray*>& hists, TObjArray* StackNames);
@@ -47,6 +48,7 @@ class SPlotter
   void GeneralCosmetics(TH1* hist);
   void PortraitCosmetics(TH1* hist);
   void LandscapeCosmetics(TH1* hist);
+  void YieldCosmetics(TH1* hist);
   void RatioCosmetics(TH1* hist);
   void CopyStyle(TH1& h1, TH1* h2);
   bool SetMinMax(std::vector<SHist*> hists);
@@ -63,6 +65,7 @@ class SPlotter
   void SetDrawEntries(Bool_t flag = true){bDrawEntries = flag;}
   void SetPlotRatio(Bool_t flag=true){bPlotRatio = flag;}
   void SetDrawLumi(Bool_t flag=true){bDrawLumi = flag;}
+  void SetLumi(float lumi){m_lumi = lumi;}
   void SetDrawLegend(Bool_t flag=true){bDrawLegend = flag;}
   void SetPsFilename(TString name);
 
@@ -76,16 +79,20 @@ class SPlotter
   TString m_ps_name;
 
   TPad* m_pad1;
-  TPad* m_rp1;
   TPad* m_pad2;
+
+  TPad* m_rp1_top;
+  TPad* m_rp1;
+  TPad* m_rp2_top;
   TPad* m_rp2;
   
-  int   m_page;             // page number in ps file
+  int   m_page;             // page number in ps file  
   bool  debug;              // output of debugging information
   bool  bShapeNorm;         // use shape normalization
   bool  bPortrait;          // portrait or landscape mode
   bool  bDrawEntries;       // display the number of entries 
   bool  bDrawLumi;          // display the lumi information 
+  float m_lumi;             // total integrated luminosity
   bool  bDrawLegend;        // display legend?
   bool  bPlotRatio;         // should a ratio be plotted?
   bool  need_update;        // should the canvas get an update?

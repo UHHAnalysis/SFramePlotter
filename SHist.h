@@ -35,6 +35,9 @@ class SHist : public TObject
   void SetIsStack(bool);
   bool IsStack();
 
+  void SetIsYieldPlot(bool);
+  bool IsYieldPlot();
+
   void SetWeight(double);
   double GetWeight();
 
@@ -64,6 +67,7 @@ class SHist : public TObject
   bool m_is_used_in_stack;
   bool m_draw_marker;
   bool m_draw;
+  bool m_is_yield_plot;
 
   ClassDef(SHist,0)  // SFrame histograms
 

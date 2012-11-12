@@ -22,6 +22,7 @@ SHist::SHist(TH1* hist)
   m_is_used_in_stack = false;
   m_draw_marker = true;
   m_draw = true;
+  m_is_yield_plot = false;
   
 }
 
@@ -41,6 +42,7 @@ SHist::SHist(THStack* stack)
   m_is_stack = true;
   m_draw_marker = false;
   m_draw = true;
+  m_is_yield_plot = false;
   
 }
 
@@ -139,6 +141,16 @@ void SHist::SetIsUsedInStack(bool flag)
 bool SHist::IsUsedInStack()
 {
   return m_is_used_in_stack;
+}
+
+void SHist::SetIsYieldPlot(bool flag)
+{
+  m_is_yield_plot = flag;
+}
+
+bool SHist::IsYieldPlot()
+{
+  return m_is_yield_plot;
 }
 
 void SHist::SetWeight(double weight)

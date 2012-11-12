@@ -20,6 +20,7 @@ SteerPlotter::SteerPlotter()
    bDrawLumi = false;
    bDrawLegend = true;
    fNumOfSamplesToStack = 0;
+   fLumi = 0;
 }
 
 SteerPlotter::~SteerPlotter()
@@ -89,6 +90,7 @@ void SteerPlotter::Print(Option_t* opt) const
   cout << (bRatioPlot? "Ratios will be plotted." : "No ratios will be plotted") << endl;
   cout << (bDrawEntries? "Number of histogram entries will be plotted." : "Number of histogram entries will not be plotted") << endl;
   cout << (bDrawLumi? "Lumi inforamtion will be plotted." : "Lumi inforamtion will not be plotted") << endl;
+  cout << "Integrated luminosity = " << fLumi << " fb-1" << endl;
   cout << (bDrawLegend? "Legend will be plotted everywhere." : "Legend will be plotted on first plot only") << endl;
   cout << (bShapeNorm? "Shape normalization" : "No shape normalization") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
@@ -123,6 +125,9 @@ Bool_t SteerPlotter::GetDrawLegend(){return bDrawLegend;}
 
 void SteerPlotter::SetJetShapesPerSlice(Bool_t flag){bJetShapesPerSlice = flag;}
 Bool_t SteerPlotter::GetJetShapesPerSlice(){return bJetShapesPerSlice;}
+
+void SteerPlotter::SetLumi(Float_t lumi){fLumi = lumi;}
+Float_t SteerPlotter::GetLumi(){return fLumi;}
 
 void SteerPlotter::SetSampleNames(const char* in) {
     this->SplitString(in,",",&fSampleNames);

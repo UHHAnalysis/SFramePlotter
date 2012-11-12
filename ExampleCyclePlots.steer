@@ -1,25 +1,27 @@
 SteerPlotter(){
   
   // steering for the plotter
-  fCycleName     = "ExampleCycle"; // name of the cycle (first part of the name of the root files)
-  fInputFiles    = "DATA.DATA.root, MC.TTbar.root, MC.Wjets.root,  MC.DY*.root, MC.SingleTop*.root "; // name of the input files (second part)
-  fSampleNames   = "     Data,          t#bar t,     W + jets,    Z/#gamma* + jets, singleSPACEtop"; // name of chains to be plotted
-  fSamplesWeight = "      1.0,          1.0,           1.0,            1.0,      1.0   "; // weights applied to the samples (same order as in fInputFiles)
-  fHistColors =  "          1,          633,           413,            858,      616";   // the colors of the histograms, negative numbers mean no filling
-  fHistMarkers = "          20,           0,             0,              0,      0";   // histogram markers (0=line, -1=dashed line, 24=open circle...)
+  fCycleName     = "/scratch/hh/dust/naf/cms/user/kogler/Zprime/example/ExampleCycle"; // name of the cycle (first part of the name of the root files)
+  fInputFiles    = "DATA.DATA.root, MC.TTbar.root, MC.Wjets.root,  MC.SingleTop*ch.root, MC.WW.root, MC.ZP1000w10.root, MC.ZP2000w20.root , MC.ZP3000w30.root"; // name of the input files (second part)
+  fSampleNames   = "     Data,          t#bar t,     W + jets,     singleSPACEtop, WW , Z'SPACE1000 ,  Z'SPACE2000 , Z'SPACE3000 "; // name of chains to be plotted
+  fSamplesWeight = "      1.0,          0.88,           0.88,            0.88,  0.88,    10.0 , 10.0 ,10.0"; // weights applied to the samples (same order as in fInputFiles)
+  fHistColors =  "          1,          633,           413,              616 , 400,  1 , 1 ,1";   // the colors of the histograms, negative numbers mean no filling
+  fHistMarkers = "          20,           0,             0,              0 ,  0,  -3 ,-2 , -4";   // histogram markers (0=line, -1=dashed line, 24=open circle...)
 
-  fSamplesToStack = "TTbar,  Wjets, DY, SingleTop"; // the names of chains which you would like to stack (same as in input filenames)
+  fSamplesToStack = "TTbar,  Wjets, SingleTop"; // the names of chains which you would like to stack (same as in input filenames)
 
   fOutputPsFile = "test.ps";
   
-  bRatioPlot = false;   // plot ratio histograms?
-  bDrawLumi = true;
+  bRatioPlot = true;   // plot ratio histograms?
+  bDrawLumi = false;
   bShapeNorm = false;   // shape normalization? 
   bPortrait = true;    // portrait or landscape?
   bDrawEntries = false; // draw the histogram entries?
   bFitPtBalanceHists = false; // perform fit of pt-balance histograms?
   bJetShapesPerSlice = false; // Plot JetShapes also slice per slice in r
-
+  bDrawLegend = true;
+  fLumi = 10.7;
+  
 }
 
 

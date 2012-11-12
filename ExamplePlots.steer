@@ -1,18 +1,20 @@
 SteerPlotter(){
   
   // steering for the plotter
-  fCycleName     = "ExampleCycle"; // name of the cycle (first part of the name of the root files)
-  fInputFiles    = "Data.root, MC.QCD*.root, MC.TTbar.root,  MC.Wjets.root, MC.LQ600.root"; // name of the input files (second part)
-  fSampleNames   = "     Data,          QCD,         TTbar,          Wjets,         LQ600"; // name of chains to be plotted
-  fSamplesWeight = "      1.0,          0.3,           0.3,            0.3,           1.0"; // weights applied to the samples (same order as in fInputFiles)
-  fHistColors =  "          1,          867,           810,            414,             1";   // the colors of the histograms, negative numbers mean no filling
-  fHistMarkers = "          20,           0,             0,              0,            -2";   // histogram markers (0=line, -1=dashed line, 24=open circle...)
+  fCycleName     = "/scratch/hh/dust/naf/cms/user/kogler/Zprime/ExampleCycle"; // name of the cycle (first part of the name of the root files)
+  fInputFiles    = "DATA.DATA.root, MC.TTbar.root,  MC.Wjets.root,   MC.SingleTop*.root,     MC.ZP1500w150.root,   MC.ZP3000w300.root"; // name of the input files (second part)
+  fSampleNames   = "     Data,              TTbar,          Wjets,       singleSPACEtop,           Z'SPACE 1500,         Z'SPACE3000"; // name of chains to be plotted
+  fSamplesWeight = "      1.0,                1.0,            1.0,                  1.0,                    1.0,                  1.0"; // weights applied to the samples (same order as in fInputFiles)
+  fHistColors =  "          1,                810,            414,                  634,                      1,                    1";   // the colors of the histograms, negative numbers mean no filling
+  fHistMarkers = "          20,                 0,              0,                    0,                      0,                   -1";   // histogram markers (0=solid line, -1=dashed line, 24=open circle...)
 
-  fSamplesToStack = "QCD,  TTbar, Wjets"; // the names of chains which you would like to stack (same as in input filenames)
+  fSamplesToStack = "TTbar,  Wjets, SingleTop"; // the names of chains which you would like to stack (same as in input filenames)
 
-  fOutputPsFile = "test.ps";
+  fOutputPsFile = "/scratch/hh/dust/naf/cms/user/kogler/Zprime/Plots/Example.ps";
   
-  bRatioPlot = false;   // plot ratio histograms?
+  bRatioPlot = true;   // plot ratio histograms?
+  bDrawLumi = true;   // plot ratio histograms?
+  bDrawLegend = false;   // plot ratio histograms?
   bShapeNorm = false;   // shape normalization? 
   bPortrait = true;    // portrait or landscape?
   bDrawEntries = false; // draw the histogram entries?

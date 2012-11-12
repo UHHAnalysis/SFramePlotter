@@ -43,7 +43,6 @@ public:
     void SetInputFiles(const char* in);
     TObjArray* GetInputFiles();
 
-
     void SetOutputPsFile(const char* in);
     const char* GetOutputPsFile();
 
@@ -74,6 +73,9 @@ public:
     void SetDrawLegend(Bool_t flag);
     Bool_t GetDrawLegend();
 
+    void SetLumi(Float_t lumi);
+    Float_t GetLumi();
+
 
 private:
 
@@ -87,6 +89,7 @@ private:
     Bool_t    bFitPtBalanceHists; // fit Pt-balance histograms?
     Bool_t    bJetShapesPerSlice; // plot each slide of the jet shape histograms?
     Int_t     fNumOfSamples;      // how many analysis samples should be plotted
+    Float_t   fLumi;              // integrated luminosity of sample
     TObjArray  fSampleNames;      // all sample name
 
     TObjArray fSamplesToStack;    // name of samples that should be stacked on top of each other
