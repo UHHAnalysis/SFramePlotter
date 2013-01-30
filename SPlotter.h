@@ -40,6 +40,7 @@ class SPlotter
   int GetCurrentPad(int);
   void DrawPageNum();
   std::vector<SHist*> CalcRatios(std::vector<SHist*> hists);
+  void ShapeNormalise(std::vector<SHist*> hists);
   void DrawLegend(std::vector<SHist*> hists);
   void DrawLumi();
   

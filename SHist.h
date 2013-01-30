@@ -54,6 +54,8 @@ class SHist : public TObject
   double GetMinimum();
   double GetMaximum(); 
 
+  void NormaliseToArea();
+
   virtual void Draw(Option_t *option="");
 
  private:

@@ -1,4 +1,5 @@
 #include "SHist.h"
+#include <TList.h>
 #include <iostream>
 
 using namespace std;
@@ -236,6 +237,43 @@ double SHist::GetMaximum()
     return m_stack->GetMaximum();
   } else {
     return m_hist->GetMaximum();
+  }
+
+}
+
+void SHist::NormaliseToArea()
+{
+  // noramlise the histogram according to its area
+  // the resulting histogram has area = 1
+
+  double area = 0.;
+  int ibeg = 1; // integrate from bin 1 
+  int iend = 1;
+
+  if (IsStack()){
+    TList* hists = m_stack->GetHists();
+    // calculate total area
+    for (int i=0; i<hists->GetSize(); ++i){
+      TH1* h = (TH1*) hists->At(i);
+      iend = h->GetNbinsX();
+      area += h->Integral(ibeg,iend);
+    }
+    // scale each histogram
+    if (area>0){
+      for (int i=0; i<hists->GetSize(); ++i){
+	TH1* h = (TH1*) hists->At(i);
+	h->Scale(1./area);
+      }
+      m_stack->Modified();
+    }
+
+  } else {
+
+    iend = m_hist->GetNbinsX();
+    area = m_hist->Integral(ibeg,iend);
+    if (area>0){
+      m_hist->Scale(1./area);
+    }
   }
 
 }

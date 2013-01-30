@@ -20,8 +20,11 @@ SPlotter::SPlotter()
   m_ps_name = "default.ps";
 
   m_pad1 = NULL;
-  m_rp1  = NULL;
   m_pad2 = NULL;
+
+  m_rp1_top = NULL;
+  m_rp1  = NULL;
+  m_rp2_top = NULL;
   m_rp2  = NULL;
 
   m_page       = 0;
@@ -291,38 +294,34 @@ void SPlotter::SetupCanvas()
                                                 //     x1            x2
 
 
-  if (bPlotRatio){
       
-    m_pad1 = new TPad("pad1", "Control Plots 1", x1, y5, x2, y6);
-    m_rp1 = new TPad("rp1", "Ratio1", x1, y4, x2, y5);
-    
-    m_pad2 = new TPad("pad2", "Control Plots 2", x1, y2, x2, y3);
-    m_rp2 = new TPad("rp2", "Ratio2", x1, y1, x2, y2);
+  m_rp1_top = new TPad("pad1", "Control Plots 1", x1, y5, x2, y6);
+  m_rp1 = new TPad("rp1", "Ratio1", x1, y4, x2, y5);
   
-  } else {
+  m_rp2_top = new TPad("pad2", "Control Plots 2", x1, y2, x2, y3);
+  m_rp2 = new TPad("rp2", "Ratio2", x1, y1, x2, y2);
+  
 
-    m_pad1 = new TPad("pad1", "Control Plots 1", x1, y4, x2, y6);
-    m_pad2 = new TPad("pad2", "Control Plots 2", x1, y1, x2, y3);
-
-  }
+  m_pad1 = new TPad("pad1", "Control Plots 1", x1, y4, x2, y6);
+  m_pad2 = new TPad("pad2", "Control Plots 2", x1, y1, x2, y3);
+  
  
   // set margins for portrait mode
   if (bPortrait){
 
     m_pad1->SetTopMargin(0.05); m_pad1->SetBottomMargin(0.13);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
     m_pad2->SetTopMargin(0.05); m_pad2->SetBottomMargin(0.13);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
-    if (bPlotRatio){
-      m_pad1->SetTopMargin(0.02); m_pad1->SetBottomMargin(0.0);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
-      m_pad2->SetTopMargin(0.02); m_pad2->SetBottomMargin(0.0);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
-      m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.19);  m_rp1->SetRightMargin(0.05);
-      m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.19);  m_rp2->SetRightMargin(0.05);
-    }
+
+    m_rp1_top->SetTopMargin(0.02); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.19); m_rp1_top->SetRightMargin(0.05);
+    m_rp2_top->SetTopMargin(0.02); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.19); m_rp2_top->SetRightMargin(0.05);
+    m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.19);  m_rp1->SetRightMargin(0.05);
+    m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.19);  m_rp2->SetRightMargin(0.05);    
 	    
   // margins for landscape
   } else {
 
-    m_pad1->SetTopMargin(0.02); m_pad1->SetBottomMargin(0.0);  m_pad1->SetLeftMargin(0.13); m_pad1->SetRightMargin(0.05);        
-    m_pad2->SetTopMargin(0.02); m_pad2->SetBottomMargin(0.0);  m_pad2->SetLeftMargin(0.13); m_pad2->SetRightMargin(0.05);
+    m_rp1_top->SetTopMargin(0.02); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.13); m_rp1_top->SetRightMargin(0.05);        
+    m_rp2_top->SetTopMargin(0.02); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.13); m_rp2_top->SetRightMargin(0.05);
     
     if (bPlotRatio){
       m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.13);  m_rp1->SetRightMargin(0.05);
@@ -333,16 +332,19 @@ void SPlotter::SetupCanvas()
 
   
   if (debug){
-    m_pad1->SetFillColor(kYellow);
-    m_pad2->SetFillColor(kOrange);
+    m_rp1_top->SetFillColor(kYellow);
+    m_rp2_top->SetFillColor(kOrange);
     if (bPlotRatio){
       m_rp1->SetFillColor(kGray);
       m_rp2->SetFillColor(kGray);
     }
   }
 
-  m_pad1->Draw(); 
+  m_pad1->Draw();
   m_pad2->Draw();
+
+  m_rp1_top->Draw(); 
+  m_rp2_top->Draw();
   
   if (bPlotRatio){
     m_rp1->Draw();
@@ -430,6 +432,8 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
     if (debug) cout << "Number of plottable hists at index " << i << " = " << hists.size() << endl;
     if (hists.size()==0) continue;
 
+    if (bShapeNorm) ShapeNormalise(hists);
+
     // new directory? create new ps file!
     TString dir = hists[0]->GetDir();
     if (dir.CompareTo(current_dir)!=0){
@@ -458,17 +462,26 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
     // cosmetics
     DoCosmetics(hists);
 
-    // do what we set out to do: plot!
-    PlotHists(hists, ipad);
-    // draw a legend     
-    if (bleg){
-      DrawLegend(GetHistsAtIndex(histarr, i));
-      if (!bDrawLegend) bleg = false;
+    // ---------- do what we set out to do: plot! ----------------
+
+    if (hists[0]->IsYieldPlot()){  // special treatment for lumi yield plot
+    
+      PlotLumiYield(hists[0], ipad);
+
+    } else { // usual plots
+
+      PlotHists(hists, ipad);
+      // draw a legend     
+      if (bleg){
+	DrawLegend(GetHistsAtIndex(histarr, i));
+	if (!bDrawLegend) bleg = false;
+      }
+      // draw lumi information
+      if (bDrawLumi) DrawLumi();
+      // draw the ratio
+      if (bPlotRatio) PlotRatios(hists, ipad);
+    
     }
-    // draw lumi information
-    if (bDrawLumi) DrawLumi();
-    // draw the ratio
-    if (bPlotRatio) PlotRatios(hists, ipad);
 
 
     ++iplot;
@@ -481,12 +494,31 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
   
 }
 
+void SPlotter::PlotLumiYield(SHist* hist, int ipad)
+{
+  // plot the lumi yield histogram
+
+  if (ipad==1) m_pad1->cd();
+  if (ipad==2) m_pad2->cd();
+
+  hist->Draw();
+  return;
+
+}
+
+
 void SPlotter::PlotHists(vector<SHist*> hists, int ipad)
 {
   // plot all histograms in the array
 
-  if (ipad==1) m_pad1->cd();
-  if (ipad==2) m_pad2->cd();
+  if (ipad==1){
+    if (bPlotRatio) m_rp1_top->cd();
+    else m_pad1->cd();
+  }
+  if (ipad==2){
+    if (bPlotRatio) m_rp2_top->cd();
+    else m_pad2->cd();
+  }
 
   bool isok = SetMinMax(hists);
   if (isok) SetLogAxes(hists);
@@ -628,8 +660,9 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
   float yfrac = 0.06;
   if (!bPlotRatio) yfrac = 0.05;
   float top = 0.92;
+  if (!bPlotRatio && bDrawLumi) top = 0.86;
   float ysize = yfrac*narr;
-  float xleft = 0.65;
+  float xleft = 0.7;
   float xright = 0.92;
   if (!bPortrait){
     top = 0.99;
@@ -692,25 +725,21 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
 
 void SPlotter::DrawLumi()
 {
-  float lumi = 5.2;
-  TString infotext = TString::Format("CMS Preliminary, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", lumi);
+  TString infotext = TString::Format("CMS Preliminary, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
   TLatex *text1 = new TLatex(3.5, 24, infotext);
   text1->SetNDC();
   text1->SetTextAlign(13);
   text1->SetX(0.22);
-  text1->SetY(0.94);
   text1->SetTextFont(42);
-  text1->SetTextSize(0.06);
+  if (bPlotRatio){ 
+    text1->SetTextSize(0.06);
+    text1->SetY(0.94);
+  } else {
+    text1->SetTextSize(0.05);
+    text1->SetY(0.92);
+  }
   text1->Draw();
   
-  //  TLatex *text2 = new TLatex(3.5,23,"5.2 fb^{-1} at #sqrt{s} = 8 TeV");
-  //text2->SetNDC();
-  //text2->SetTextAlign(13);
-  //text2->SetX(0.22);
-  //text2->SetY(0.89);
-  //text2->SetTextFont(42);
-  //text2->SetTextSizePixels(40);
-  //text2->Draw();
 }
 
 void SPlotter::DoCosmetics(vector<SHist*> hists)
@@ -724,6 +753,7 @@ void SPlotter::DoCosmetics(vector<SHist*> hists)
     GeneralCosmetics(sh->GetHist());
     if (bPortrait) PortraitCosmetics(sh->GetHist());
     if (!bPortrait) LandscapeCosmetics(sh->GetHist());
+    if (sh->IsYieldPlot()) YieldCosmetics(sh->GetHist());
   }
 
 }
@@ -783,23 +813,13 @@ bool SPlotter::SetMinMax(vector<SHist*> hists)
     uscale = 12.;
   }
 
-
-
   for (int i=0; i<narr; ++i){
     SHist* h = hists[i];
     if (h->IsStack()){ 
-      if (!islog){
-	h->GetStack()->SetMinimum(0.001);
-      } else { 
-	if (min>1e-10) h->GetStack()->SetMinimum(min);
-      }
+      if (!islog) h->GetStack()->SetMinimum(0.001);
       h->GetStack()->SetMaximum(uscale*max);
     } else {
-      if (!islog){ 
-	h->GetHist()->SetMinimum(0.001);
-      } else { 
-	if (min>1e-10) h->GetHist()->SetMinimum(min);
-      }
+      if (!islog) h->GetHist()->SetMinimum(0.001);
       h->GetHist()->SetMaximum(uscale*max);
     }
   }  
@@ -868,6 +888,15 @@ vector<SHist*> SPlotter::GetPlottableHists(std::vector<TObjArray*> histarr, int 
   // plotting not supported yet, to come
   if (hist->GetHist()->InheritsFrom(TH2::Class())){
     if (debug) cout << "Hist inherits from TH2, return without adding any to the array " << endl;
+    return hists;
+  }
+
+  TString name = hist->GetName();
+  TString process = hist->GetProcessName();
+  if (process.Contains("data",TString::kIgnoreCase) 
+      && name.Contains("_perlumibin", TString::kIgnoreCase)){
+    hist->SetIsYieldPlot(true);
+    hists.push_back(hist);
     return hists;
   }
 
@@ -995,6 +1024,26 @@ void SPlotter::PortraitCosmetics(TH1* hist)
   
 }
 
+void SPlotter::YieldCosmetics(TH1* hist)
+{
+  // cosmetics for the lumi yield histogram
+    hist->GetXaxis()->SetLabelSize(0.05);
+    hist->GetXaxis()->SetLabelOffset(0.008);
+    hist->GetXaxis()->SetTickLength(0.03);
+    hist->GetXaxis()->SetTitleSize(0.05);
+    hist->GetXaxis()->SetTitleOffset(1.2);
+    
+    hist->GetYaxis()->SetTitleOffset(1.2);
+    hist->GetYaxis()->SetTitleSize(0.06);
+    hist->GetYaxis()->SetLabelSize(0.045);
+    hist->GetYaxis()->SetTickLength(0.02);
+    hist->GetYaxis()->SetLabelOffset(0.011);
+
+    hist->GetXaxis()->SetTitle("time (constant luminosity)");
+    hist->GetYaxis()->SetTitle("events per luminosity");
+  
+}
+
 void SPlotter::LandscapeCosmetics(TH1* hist)
 {
 
@@ -1048,6 +1097,12 @@ void SPlotter::RatioCosmetics(TH1* hist)
     
   }
 
-
-
 }
+
+void SPlotter::ShapeNormalise(std::vector<SHist*> hists)
+{
+  for (unsigned int i=0; i<hists.size(); ++i){
+    hists[i]->NormaliseToArea();
+  }
+}
+
