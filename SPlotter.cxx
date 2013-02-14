@@ -109,6 +109,7 @@ void SPlotter::StackHists(std::vector<TObjArray*>& hists, int index)
     if (!stack || !hist){
       cerr << "SPlotter::StackHists: stack or hist at position " << i 
 	   << " does not exist! Abort." << endl;
+      cerr << "index of hists = " << hists.size() << " histograms = " << hists[index]->GetEntries() << endl;
       exit(EXIT_FAILURE);
     }
     // sanity check: compare names
@@ -309,11 +310,11 @@ void SPlotter::SetupCanvas()
   // set margins for portrait mode
   if (bPortrait){
 
-    m_pad1->SetTopMargin(0.05); m_pad1->SetBottomMargin(0.13);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
-    m_pad2->SetTopMargin(0.05); m_pad2->SetBottomMargin(0.13);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
+    m_pad1->SetTopMargin(0.09); m_pad1->SetBottomMargin(0.13);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
+    m_pad2->SetTopMargin(0.09); m_pad2->SetBottomMargin(0.13);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
 
-    m_rp1_top->SetTopMargin(0.02); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.19); m_rp1_top->SetRightMargin(0.05);
-    m_rp2_top->SetTopMargin(0.02); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.19); m_rp2_top->SetRightMargin(0.05);
+    m_rp1_top->SetTopMargin(0.07); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.19); m_rp1_top->SetRightMargin(0.05);
+    m_rp2_top->SetTopMargin(0.07); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.19); m_rp2_top->SetRightMargin(0.05);
     m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.19);  m_rp1->SetRightMargin(0.05);
     m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.19);  m_rp2->SetRightMargin(0.05);    
 	    
@@ -659,7 +660,7 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
   int narr = hists.size();
   float yfrac = 0.06;
   if (!bPlotRatio) yfrac = 0.05;
-  float top = 0.92;
+  float top = 0.9;
   if (!bPlotRatio && bDrawLumi) top = 0.86;
   float ysize = yfrac*narr;
   float xleft = 0.7;
@@ -797,7 +798,12 @@ bool SPlotter::SetMinMax(vector<SHist*> hists)
   double min = FLT_MAX;
   for (int i=0; i<narr; ++i){
     if (max<hists[i]->GetMaximum()) max = hists[i]->GetMaximum();
-    if (min>hists[i]->GetMinimum()) min = hists[i]->GetMinimum();
+    double imin = hists[i]->GetMinimum(1e-10);
+    if (min>imin){
+      if (imin>1e-10){
+	min = imin;
+      }
+    }
   }
 
   bool isok = true;
@@ -816,10 +822,30 @@ bool SPlotter::SetMinMax(vector<SHist*> hists)
   for (int i=0; i<narr; ++i){
     SHist* h = hists[i];
     if (h->IsStack()){ 
-      if (!islog) h->GetStack()->SetMinimum(0.001);
+      if (!islog){
+	h->GetStack()->SetMinimum(0.001);
+      } else { 
+	if (min>1e-10){
+	  if (min<0.1){
+	    h->GetStack()->SetMinimum(0.04);
+	  } else {
+	    h->GetStack()->SetMinimum(min);
+	  }
+	}
+      }
       h->GetStack()->SetMaximum(uscale*max);
     } else {
-      if (!islog) h->GetHist()->SetMinimum(0.001);
+      if (!islog){ 
+	h->GetHist()->SetMinimum(0.001);
+      } else { 
+	if (min>1e-10){
+	  if (min<0.1){
+	    h->GetHist()->SetMinimum(0.04);
+	  } else {
+	    h->GetHist()->SetMinimum(min);
+	  }
+	}
+      }
       h->GetHist()->SetMaximum(uscale*max);
     }
   }  
@@ -1024,6 +1050,7 @@ void SPlotter::PortraitCosmetics(TH1* hist)
   
 }
 
+
 void SPlotter::YieldCosmetics(TH1* hist)
 {
   // cosmetics for the lumi yield histogram
@@ -1039,10 +1066,12 @@ void SPlotter::YieldCosmetics(TH1* hist)
     hist->GetYaxis()->SetTickLength(0.02);
     hist->GetYaxis()->SetLabelOffset(0.011);
 
-    hist->GetXaxis()->SetTitle("time (constant luminosity)");
+    hist->GetXaxis()->SetTitle("integrated luminosity[fb^{-1}]");
     hist->GetYaxis()->SetTitle("events per luminosity");
   
 }
+
+
 
 void SPlotter::LandscapeCosmetics(TH1* hist)
 {
@@ -1054,7 +1083,8 @@ void SPlotter::LandscapeCosmetics(TH1* hist)
 void SPlotter::RatioCosmetics(TH1* hist)
 {
 
-  hist->GetYaxis()->SetRangeUser(0.3, 1.7);
+  //hist->GetYaxis()->SetRangeUser(0.3, 1.7);
+  hist->GetYaxis()->SetRangeUser(0.05, 1.95);
   hist->SetMarkerSize(0.7);
 
   // cosmetics for portrait mode 
@@ -1072,7 +1102,8 @@ void SPlotter::RatioCosmetics(TH1* hist)
     hist->GetYaxis()->SetTitleSize(0.12);
     hist->GetYaxis()->SetTitleOffset(0.46);
     hist->GetYaxis()->SetLabelSize(0.11);
-    hist->GetYaxis()->SetNdivisions(210);
+    //hist->GetYaxis()->SetNdivisions(210);
+    hist->GetYaxis()->SetNdivisions(505);
     hist->GetYaxis()->SetTickLength(0.02);
     hist->GetYaxis()->SetLabelOffset(0.011);
 
