@@ -104,6 +104,9 @@ void SHist::SetLegName(TString name)
 {
   m_leg_name = name;
   m_leg_name.ReplaceAll("SPACE", " ");
+  m_leg_name.ReplaceAll("_", " ");
+  m_leg_name.ReplaceAll("ttbar", "t#bar{t}");
+  m_leg_name.ReplaceAll("~", ",");
   m_leg_name.ReplaceAll("[", "{");
   m_leg_name.ReplaceAll("]", "}");
 }
@@ -219,13 +222,13 @@ void SHist::Draw(Option_t *option)
 
 }
 
-double SHist::GetMinimum()
+double SHist::GetMinimum(double minval)
 {
   // get minimum
   if (IsStack()){
     return m_stack->GetMinimum();
   } else {
-    return m_hist->GetMinimum();
+    return m_hist->GetMinimum(minval);
   }
 
 }
