@@ -283,14 +283,15 @@ TGraphAsymmErrors* get_ratio(TGraphAsymmErrors* top, TGraphAsymmErrors* bottom)
     ratio->SetPoint(i,xt,r);
     
     // up error
-    double ut = top->GetErrorYhigh(i);
-    double ub = bottom->GetErrorYlow(i);
+    double ut = top->GetErrorYhigh(i)/yb;
+    double ub = (bottom->GetErrorYlow(i)*yt)/(yb*yb);
     double up = TMath::Sqrt(ut*ut+ub*ub);
+
     ratio->SetPointEYhigh(i, up*r);
 
     // down error
-    double dt = top->GetErrorYlow(i);
-    double db = bottom->GetErrorYhigh(i);
+    double dt = top->GetErrorYlow(i)/yb;
+    double db = (bottom->GetErrorYhigh(i)*yt)/(yb*yb);
     double down = TMath::Sqrt(dt*dt+db*db);
     ratio->SetPointEYlow(i, down*r);
   }
