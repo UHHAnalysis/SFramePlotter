@@ -9,6 +9,9 @@
 #include <TLegend.h>
 #include <TLegendEntry.h>
 #include <TLatex.h>
+#include <TF1.h>
+#include <TMath.h>
+#include <TColor.h>
 #include "SPlotter.h"
 
 using namespace std;
@@ -28,6 +31,8 @@ SPlotter::SPlotter()
   m_rp2  = NULL;
 
   m_page       = 0;
+  m_lumi       = 0;
+  m_syserr     = 0;
   debug        = false;
   bShapeNorm   = false;
   bPortrait    = true;
@@ -310,19 +315,19 @@ void SPlotter::SetupCanvas()
   // set margins for portrait mode
   if (bPortrait){
 
-    m_pad1->SetTopMargin(0.09); m_pad1->SetBottomMargin(0.13);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
-    m_pad2->SetTopMargin(0.09); m_pad2->SetBottomMargin(0.13);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
+    m_pad1->SetTopMargin(0.05); m_pad1->SetBottomMargin(0.16);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
+    m_pad2->SetTopMargin(0.05); m_pad2->SetBottomMargin(0.16);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
 
-    m_rp1_top->SetTopMargin(0.07); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.19); m_rp1_top->SetRightMargin(0.05);
-    m_rp2_top->SetTopMargin(0.07); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.19); m_rp2_top->SetRightMargin(0.05);
+    m_rp1_top->SetTopMargin(0.065); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.19); m_rp1_top->SetRightMargin(0.05);
+    m_rp2_top->SetTopMargin(0.065); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.19); m_rp2_top->SetRightMargin(0.05);
     m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.19);  m_rp1->SetRightMargin(0.05);
     m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.19);  m_rp2->SetRightMargin(0.05);    
 	    
   // margins for landscape
   } else {
 
-    m_rp1_top->SetTopMargin(0.02); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.13); m_rp1_top->SetRightMargin(0.05);        
-    m_rp2_top->SetTopMargin(0.02); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.13); m_rp2_top->SetRightMargin(0.05);
+    m_rp1_top->SetTopMargin(0.065); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.13); m_rp1_top->SetRightMargin(0.05);        
+    m_rp2_top->SetTopMargin(0.065); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.13); m_rp2_top->SetRightMargin(0.05);
     
     if (bPlotRatio){
       m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.13);  m_rp1->SetRightMargin(0.05);
@@ -503,6 +508,45 @@ void SPlotter::PlotLumiYield(SHist* hist, int ipad)
   if (ipad==2) m_pad2->cd();
 
   hist->Draw();
+
+  // do a fit
+  TH1* h = hist->GetHist();
+  TF1* f = new TF1("average", "[0]", h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax());
+  f->SetLineColor(kAzure+1);
+  f->SetLineWidth(1);
+  h->Fit(f);
+
+  double val = f->GetParameter(0);
+  double err = f->GetParError(0);
+
+  TF1* fup = new TF1("up", "[0]", h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax());
+  TF1* fdown = new TF1("down", "[0]", h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax());
+  fup->SetParameter(0, val+err);
+  fdown->SetParameter(0, val-err);
+  fup->SetLineColor(kAzure+1);
+  fdown->SetLineColor(kAzure+1);
+  fup->SetLineWidth(1);
+  fdown->SetLineWidth(1);
+  fup->SetLineStyle(kDashed);
+  fdown->SetLineStyle(kDashed);
+  fup->Draw("same");
+  fdown->Draw("same");
+
+  TLatex* text = new TLatex();
+  text->SetTextFont(42);
+  text->SetNDC();
+  text->SetTextColor(kBlack);
+  text->SetTextSize(0.05);
+  text->SetTextAlign(11);
+  TString info = TString::Format("#chi^{2} / ndf");
+  text->DrawLatex(0.57, 0.30, info.Data());
+  info = TString::Format("%3.1f / %d", f->GetChisquare(), f->GetNDF());
+  text->DrawLatex(0.72, 0.30, info.Data());
+  info = TString::Format("average");
+  text->DrawLatex(0.57, 0.23, info.Data());
+  info = TString::Format("%4.1f #pm %4.1f", val, err);
+  text->DrawLatex(0.72, 0.23, info.Data());
+
   return;
 
 }
@@ -535,6 +579,29 @@ void SPlotter::PlotHists(vector<SHist*> hists, int ipad)
     ++ndrawn;
   }
 
+  if (debug){
+    if (sdata){
+      cout << "\nHist name = " << sdata->GetName() << " process = " << sdata->GetProcessName() << endl;
+      cout << "hists, entries = " << hists.size() << endl;
+      cout << "Data entries = " << sdata->GetHist()->Integral() << endl;
+    }
+    if (sstack){
+      double stack_entries = 0;
+      TObjArray* arr = sstack->GetStack()->GetStack();
+      TH1* h = (TH1*)arr->At(arr->GetEntries()-1);
+      stack_entries = h->Integral();
+      cout << "Stack entries = " << stack_entries << endl;
+      TList* hists = sstack->GetStack()->GetHists();
+      // calculate individual area
+      for (int i=0; i<hists->GetSize(); ++i){
+	TH1* h = (TH1*) hists->At(i);
+	int iend = h->GetNbinsX();
+	double area = h->Integral(1,iend);
+	cout << "  entries of histogram " << i << " in stack = " << area << endl;
+      }
+    }
+  }
+
   // first round
   int nh = hists.size();
 
@@ -565,11 +632,37 @@ void SPlotter::PlotHists(vector<SHist*> hists, int ipad)
     sh->Draw("same");
   }
 
+  // draw normalisation error if it is given
+  if (sstack){
+    DrawNormError(sstack);
+  }
+
   // draw data on top
   if (sdata) sdata->Draw("same");
 
   gPad->RedrawAxis();
   
+}
+
+void SPlotter::DrawNormError(SHist* stack)
+{
+  // plot an error band corresponding to the overall
+  // normalisation error
+  TH1* h = (TH1*) stack->GetStack()->GetStack()->At( stack->GetStack()->GetStack()->GetEntries()-1 );
+  TH1* e = (TH1*) h->Clone();
+  for (Int_t i=1; i<e->GetNbinsX()+1; ++i){
+    Double_t sys = m_syserr*e->GetBinContent(i);
+    Double_t stat = e->GetBinError(i);
+    Double_t err = TMath::Sqrt(sys*sys + stat*stat);
+    e->SetBinError(i, err);
+  }
+  static Int_t LightGray     = TColor::GetColor( "#aaaaaa" );
+  //e->SetFillColor(kGray+2);
+  e->SetFillColor(LightGray);
+  e->SetLineWidth(1);
+  e->SetFillStyle(3245);
+  e->Draw("E2 same");
+
 }
 
 void SPlotter::PlotRatios(vector<SHist*> hists, int ipad)
@@ -626,26 +719,55 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
   TH1D* denom = (TH1D*) arr->At(arr->GetEntries()-1);
 
   rdhist->Divide(denom);
+  // set the error to display only the error on the data
+  for (Int_t ibin=1;ibin<denom->GetNbinsX()+1; ++ibin){
+    Double_t val = sdata->GetHist()->GetBinContent(ibin);
+    Double_t err = sdata->GetHist()->GetBinError(ibin);
+    Double_t rel_err = err / val;
+    rdhist->SetBinError(ibin, rel_err * rdhist->GetBinContent(ibin) );
+  }
   rdhist->GetYaxis()->SetTitle(rd->GetProcessName() + " / MC");
   RatioCosmetics(rdhist);
 
-  // one histogram for the MC statistical error
+  // one histogram for the MC statistical error and one for the total error
   SHist* mcerr = new SHist(rdhist);
   mcerr->GetHist()->SetName("MCstat");
   mcerr->SetProcessName("MCstat");
   TH1D* MCstat = (TH1D*)mcerr->GetHist();
+
+  SHist* mctot = new SHist(rdhist);
+  mctot->GetHist()->SetName("MCtot");
+  mctot->SetProcessName("MCtot");
+  TH1D* MCtot = (TH1D*)mctot->GetHist();
 
   for (Int_t ibin=1;ibin<denom->GetNbinsX()+1; ++ibin){
     Double_t val = denom->GetBinContent(ibin);
     Double_t err = denom->GetBinError(ibin);
     MCstat->SetBinContent(ibin,  1.0);
     MCstat->SetBinError(ibin,  err/val);
+
+    Double_t sys = m_syserr;
+    Double_t tot = TMath::Sqrt(sys*sys + err/val*err/val);
+    MCtot->SetBinContent(ibin, 1.0);
+    MCtot->SetBinError(ibin, tot);
   }
+
+  static Int_t VLightGray    = TColor::GetColor( "#eeeeee" );
+  static Int_t MLightGray    = TColor::GetColor( "#dddddd" );
+  //static Int_t LightGray     = TColor::GetColor( "#aaaaaa" );
+  //static Int_t Gray          = TColor::GetColor( "#888888" );
+
   MCstat->SetMarkerStyle(0);
   MCstat->SetMarkerSize(0);
-  MCstat->SetLineColor(kGray);
-  MCstat->SetFillColor(kGray);
+  MCstat->SetLineColor(MLightGray);
+  MCstat->SetFillColor(MLightGray);
 
+  MCtot->SetMarkerStyle(0);
+  MCtot->SetMarkerSize(0);
+  MCtot->SetLineColor(VLightGray);
+  MCtot->SetFillColor(VLightGray);
+
+  ratios.push_back(mctot);
   ratios.push_back(mcerr);
   ratios.push_back(rd);	  
  
@@ -660,7 +782,8 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
   int narr = hists.size();
   float yfrac = 0.06;
   if (!bPlotRatio) yfrac = 0.05;
-  float top = 0.9;
+
+  float top = 0.89;
   if (!bPlotRatio && bDrawLumi) top = 0.86;
   float ysize = yfrac*narr;
   float xleft = 0.7;
@@ -734,9 +857,9 @@ void SPlotter::DrawLumi()
   text1->SetTextFont(42);
   if (bPlotRatio){ 
     text1->SetTextSize(0.06);
-    text1->SetY(0.94);
+    text1->SetY(0.89);
   } else {
-    text1->SetTextSize(0.05);
+    text1->SetTextSize(0.045);
     text1->SetY(0.92);
   }
   text1->Draw();
@@ -798,6 +921,7 @@ bool SPlotter::SetMinMax(vector<SHist*> hists)
   double min = FLT_MAX;
   for (int i=0; i<narr; ++i){
     if (max<hists[i]->GetMaximum()) max = hists[i]->GetMaximum();
+    if (min>hists[i]->GetMinimum(1e-6)) min = hists[i]->GetMinimum(1e-6);
     double imin = hists[i]->GetMinimum(1e-10);
     if (min>imin){
       if (imin>1e-10){
@@ -997,7 +1121,7 @@ void SPlotter::DrawPageNum()
 void SPlotter::GeneralCosmetics(TH1* hist)
 {
   // set Y-axis title
-  hist->GetYaxis()->SetTitle("Entries");  
+  hist->GetYaxis()->SetTitle("Events");  
   
   // set X-axis title
   hist->GetXaxis()->SetTitle(hist->GetTitle()); 
@@ -1066,9 +1190,10 @@ void SPlotter::YieldCosmetics(TH1* hist)
     hist->GetYaxis()->SetTickLength(0.02);
     hist->GetYaxis()->SetLabelOffset(0.011);
 
-    hist->GetXaxis()->SetTitle("integrated luminosity[fb^{-1}]");
-    hist->GetYaxis()->SetTitle("events per luminosity");
-  
+    hist->GetXaxis()->SetTitle("integrated luminosity [fb^{-1}]");
+    double dlum = hist->GetXaxis()->GetBinWidth(1);
+    TString xtit = TString::Format("events per %3.1f fb^{-1}", dlum);
+    hist->GetYaxis()->SetTitle(xtit);
 }
 
 

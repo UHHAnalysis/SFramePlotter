@@ -24,6 +24,7 @@ class SPlotter
   std::vector<SHist*> GetPlottableHists(std::vector<TObjArray*> histarr, int index);
   std::vector<SHist*> GetHistsAtIndex(std::vector<TObjArray*> histarr, int index);
   void PlotHists(std::vector<SHist*> hists, int ipad);
+  void DrawNormError(SHist* stack);
   void PlotRatios(std::vector<SHist*> hists, int ipad);
   void PlotLumiYield(SHist* hist, int ipad);
 
@@ -67,6 +68,7 @@ class SPlotter
   void SetPlotRatio(Bool_t flag=true){bPlotRatio = flag;}
   void SetDrawLumi(Bool_t flag=true){bDrawLumi = flag;}
   void SetLumi(float lumi){m_lumi = lumi;}
+  void SetNormError(float err){m_syserr = err;}
   void SetDrawLegend(Bool_t flag=true){bDrawLegend = flag;}
   void SetPsFilename(TString name);
 
@@ -94,6 +96,7 @@ class SPlotter
   bool  bDrawEntries;       // display the number of entries 
   bool  bDrawLumi;          // display the lumi information 
   float m_lumi;             // total integrated luminosity
+  float m_syserr;           // systematic error on normalisation uncertainty
   bool  bDrawLegend;        // display legend?
   bool  bPlotRatio;         // should a ratio be plotted?
   bool  need_update;        // should the canvas get an update?

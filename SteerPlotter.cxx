@@ -21,6 +21,7 @@ SteerPlotter::SteerPlotter()
    bDrawLegend = true;
    fNumOfSamplesToStack = 0;
    fLumi = 0;
+   fSysError = -1.;
 }
 
 SteerPlotter::~SteerPlotter()
@@ -91,6 +92,11 @@ void SteerPlotter::Print(Option_t* opt) const
   cout << (bDrawEntries? "Number of histogram entries will be plotted." : "Number of histogram entries will not be plotted") << endl;
   cout << (bDrawLumi? "Lumi inforamtion will be plotted." : "Lumi inforamtion will not be plotted") << endl;
   cout << "Integrated luminosity = " << fLumi << " fb-1" << endl;
+  if (fSysError>0){
+    cout << "Normalisation error of " << fSysError*100 << "% will be drawn." << endl;
+  } else {
+    cout << "No normalisation error will be drawn." << endl;
+  }
   cout << (bDrawLegend? "Legend will be plotted everywhere." : "Legend will be plotted on first plot only") << endl;
   cout << (bShapeNorm? "Shape normalization" : "No shape normalization") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
@@ -128,6 +134,9 @@ Bool_t SteerPlotter::GetJetShapesPerSlice(){return bJetShapesPerSlice;}
 
 void SteerPlotter::SetLumi(Float_t lumi){fLumi = lumi;}
 Float_t SteerPlotter::GetLumi(){return fLumi;}
+
+void SteerPlotter::SetSysError(Float_t err){fSysError = err;}
+Float_t SteerPlotter::GetSysError(){return fSysError;}
 
 void SteerPlotter::SetSampleNames(const char* in) {
     this->SplitString(in,",",&fSampleNames);

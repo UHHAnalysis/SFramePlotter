@@ -76,6 +76,8 @@ public:
     void SetLumi(Float_t lumi);
     Float_t GetLumi();
 
+    void SetSysError(Float_t err);
+    Float_t GetSysError();
 
 private:
 
@@ -90,6 +92,7 @@ private:
     Bool_t    bJetShapesPerSlice; // plot each slide of the jet shape histograms?
     Int_t     fNumOfSamples;      // how many analysis samples should be plotted
     Float_t   fLumi;              // integrated luminosity of sample
+    Float_t   fSysError;          // systematic error on normalisation
     TObjArray  fSampleNames;      // all sample name
 
     TObjArray fSamplesToStack;    // name of samples that should be stacked on top of each other

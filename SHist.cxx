@@ -202,7 +202,7 @@ void SHist::Draw(Option_t *option)
 
   TString dopt(option);
 
-  if (m_process.Contains("MCstat")){
+  if (m_process.Contains("MCstat") || m_process.Contains("MCtot")){
     m_hist->DrawCopy("E2 " + dopt);
     m_hist->SetFillColor(0);
     m_hist->DrawCopy("HIST same");
