@@ -51,7 +51,7 @@ class SHist : public TObject
   TH1* GetHist();
   THStack* GetStack();
 
-  double GetMinimum();
+  double GetMinimum(double minval);
   double GetMaximum(); 
 
   void NormaliseToArea();

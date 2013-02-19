@@ -30,7 +30,6 @@
 
 #include "SteerParser.h"
 #include "SteerPlotter.h"
-#include "RootPlotter.h"
 #include "FileParser.h"
 #include "SHist.h"
 #include "SPlotter.h"
@@ -138,34 +137,6 @@ int main(int argc, char** argv)
   // _______________ do the plotting ______________
   
   pl.ProcessAndPlot(harr);
-
-  exit(1);
-
-  /*
-  RootPlotter* plotter = new RootPlotter();
-  if (CycleName.Length()>0){
-    plotter->OpenRootFiles(InputFilenames, CycleName);
-  } else {
-    plotter->OpenRootFiles(InputFilenames);
-  }
-  plotter->SetSampleNames(SampleNames);
-  plotter->SetShapeNorm(ShapeNorm);
-  plotter->SetPortraitMode(PortraitMode);
-  plotter->SetDrawEntries(DrawEntries);
-  plotter->SetHistColors(HistColors);
-  plotter->SetHistMarkers(HistMarkers);
-  plotter->PerformFit(PtBalanceFitOpt);
-  plotter->SetSubstractBkgd(SubstractBkgd);
-  plotter->SetJetShapesPerSlice(JetShapesPerSlice);
-  plotter->SetSamplesToStack(SamplesToStack);
-  plotter->SetSamplesWeight(SamplesWeight);
-  plotter->SetPlotRatio(RatioPlot);
-  plotter->SetDrawLumi(DrawLumi); 
-  
-  // ____________ do the actual plotting ______________
-
-  plotter->PlotHistos(PsFilename);
-  */
 
   // Done! Exit Root
   gSystem->Exit(0);

@@ -109,6 +109,8 @@ void SHist::SetLegName(TString name)
   m_leg_name.ReplaceAll("~", ",");
   m_leg_name.ReplaceAll("[", "{");
   m_leg_name.ReplaceAll("]", "}");
+  m_leg_name.ReplaceAll("_", " ");
+  m_leg_name.ReplaceAll("ttbar", "t#bar{t}");
 }
 
 TString SHist::GetLegName()
