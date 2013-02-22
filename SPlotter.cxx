@@ -32,7 +32,7 @@ SPlotter::SPlotter()
 
   m_page       = 0;
   m_lumi       = 0;
-  m_syserr     = 0;
+  m_syserr     = -1;
   debug        = false;
   bShapeNorm   = false;
   bPortrait    = true;
@@ -651,7 +651,8 @@ void SPlotter::DrawNormError(SHist* stack)
   TH1* h = (TH1*) stack->GetStack()->GetStack()->At( stack->GetStack()->GetStack()->GetEntries()-1 );
   TH1* e = (TH1*) h->Clone();
   for (Int_t i=1; i<e->GetNbinsX()+1; ++i){
-    Double_t sys = m_syserr*e->GetBinContent(i);
+    Double_t sys = 0; 
+    if (m_syserr>0) m_syserr*e->GetBinContent(i);
     Double_t stat = e->GetBinError(i);
     Double_t err = TMath::Sqrt(sys*sys + stat*stat);
     e->SetBinError(i, err);
@@ -746,7 +747,8 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     MCstat->SetBinContent(ibin,  1.0);
     MCstat->SetBinError(ibin,  err/val);
 
-    Double_t sys = m_syserr;
+    Double_t sys = 0;
+    if (m_syserr>0) sys = m_syserr;
     Double_t tot = TMath::Sqrt(sys*sys + err/val*err/val);
     MCtot->SetBinContent(ibin, 1.0);
     MCtot->SetBinError(ibin, tot);
