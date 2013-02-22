@@ -164,7 +164,14 @@ void FileParser::BrowseFile()
       if ( obj->IsA()->InheritsFrom( TH1::Class() ) ) {
 
 	// histogram found
-	SHist* shist = new SHist((TH1*) obj);
+	TH1* thist = (TH1*) obj;
+	TH1* rebinned = Rebin(thist, dirname);
+	SHist* shist = NULL;
+	if (rebinned){
+	  shist = new SHist(rebinned);
+	} else {
+	  shist = new SHist(thist);
+	}
 	shist->SetProcessName(m_process);
 	shist->SetDir(dirname);
 	if (debug) cout << "Adding hist " << shist->GetHist()->GetName() 
@@ -179,6 +186,23 @@ void FileParser::BrowseFile()
   }
   
   return;
+
+}
+
+TH1* FileParser::Rebin(TH1* hist, TString dirname)
+{						
+  TString name(hist->GetName());
+  TString title(hist->GetTitle());
+  if (name.CompareTo("pT")==0 && dirname.Contains("Electron") && title.Contains("electron")){
+    //Double_t binsx[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 350, 400, 500};
+    Double_t binsx[] = {30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 350, 400, 500};
+    name.Append("_rebin_lx");
+    TH1* rebinned = hist->Rebin(37, name, binsx);
+    rebinned->SetTitle("electron P_{T} [GeV]");
+    return rebinned;
+  } else {
+    return NULL;
+  }
 
 }
 

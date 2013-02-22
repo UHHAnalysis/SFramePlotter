@@ -23,6 +23,7 @@ class FileParser
   bool FileExists(TString name);
 
   void SetInfo(TString legname, double weight, int colour, int marker);
+  TH1* Rebin(TH1* hist, TString dirname);
 
   TObjArray* GetHists(){return m_hists;}
   void SetDebug(bool flag=true){debug = flag;}
