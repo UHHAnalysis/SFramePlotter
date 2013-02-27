@@ -6,6 +6,7 @@
 #include <TKey.h>
 #include <TDirectory.h>
 #include <TClass.h>
+#include <TMath.h>
 
 #include "FileParser.h"
 #include "SHist.h"
@@ -17,6 +18,7 @@ FileParser::FileParser()
   m_file = NULL;
   m_hists = NULL;
   debug = false;
+  m_do_cumulative = true;
 }
 
 FileParser::~FileParser()
@@ -165,6 +167,7 @@ void FileParser::BrowseFile()
 
 	// histogram found
 	TH1* thist = (TH1*) obj;
+	if (m_do_cumulative) MakeCumulativeHist(thist);
 	TH1* rebinned = Rebin(thist, dirname);
 	SHist* shist = NULL;
 	if (rebinned){
@@ -188,6 +191,22 @@ void FileParser::BrowseFile()
   return;
 
 }
+
+void FileParser::MakeCumulativeHist(TH1* hist)
+{
+  for (Int_t i=1; i<hist->GetNbinsX()+1; ++i){
+    Double_t sum = 0;
+    Double_t sumw2 = 0;
+    for (int j=i; j<hist->GetNbinsX()+1; ++j){
+      sum += hist->GetBinContent(j);
+      sumw2 += hist->GetSumw2()->At(j);
+    }
+    hist->SetBinContent(i, sum);
+    hist->SetBinError(i, TMath::Sqrt(sumw2));
+  }
+
+}
+
 
 TH1* FileParser::Rebin(TH1* hist, TString dirname)
 {						

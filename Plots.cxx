@@ -102,11 +102,13 @@ int main(int argc, char** argv)
   Float_t Lumi               = steerfile->GetLumi();
   Float_t SysErr             = steerfile->GetSysError();
   Bool_t DrawLegend          = steerfile->GetDrawLegend();
+  Bool_t DoCumulative        = steerfile->GetDoCumulative();
 
   // _______________ loop over files and get all histograms ______________
 
   FileParser fp;
   //fp.SetDebug();
+  fp.SetDoCumulative(DoCumulative);
   vector<TObjArray*> harr;
   for (int i=0; i<InputFilenames->GetEntries(); ++i){
     TString file = ((TObjString*)InputFilenames->At(i))->GetString();

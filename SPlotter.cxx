@@ -652,7 +652,7 @@ void SPlotter::DrawNormError(SHist* stack)
   TH1* e = (TH1*) h->Clone();
   for (Int_t i=1; i<e->GetNbinsX()+1; ++i){
     Double_t sys = 0; 
-    if (m_syserr>0) m_syserr*e->GetBinContent(i);
+    if (m_syserr>0) sys = m_syserr*e->GetBinContent(i);
     Double_t stat = e->GetBinError(i);
     Double_t err = TMath::Sqrt(sys*sys + stat*stat);
     e->SetBinError(i, err);
@@ -754,20 +754,20 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     MCtot->SetBinError(ibin, tot);
   }
 
-  static Int_t VLightGray    = TColor::GetColor( "#eeeeee" );
+  //static Int_t VLightGray    = TColor::GetColor( "#eeeeee" );
   static Int_t MLightGray    = TColor::GetColor( "#dddddd" );
-  //static Int_t LightGray     = TColor::GetColor( "#aaaaaa" );
+  static Int_t LightGray     = TColor::GetColor( "#aaaaaa" );
   //static Int_t Gray          = TColor::GetColor( "#888888" );
 
   MCstat->SetMarkerStyle(0);
   MCstat->SetMarkerSize(0);
-  MCstat->SetLineColor(MLightGray);
-  MCstat->SetFillColor(MLightGray);
+  MCstat->SetLineColor(LightGray);
+  MCstat->SetFillColor(LightGray);
 
   MCtot->SetMarkerStyle(0);
   MCtot->SetMarkerSize(0);
-  MCtot->SetLineColor(VLightGray);
-  MCtot->SetFillColor(VLightGray);
+  MCtot->SetLineColor(MLightGray);
+  MCtot->SetFillColor(MLightGray);
 
   ratios.push_back(mctot);
   ratios.push_back(mcerr);

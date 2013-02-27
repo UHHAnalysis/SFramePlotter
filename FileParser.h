@@ -24,9 +24,13 @@ class FileParser
 
   void SetInfo(TString legname, double weight, int colour, int marker);
   TH1* Rebin(TH1* hist, TString dirname);
+  void MakeCumulativeHist(TH1* hist);
 
   TObjArray* GetHists(){return m_hists;}
   void SetDebug(bool flag=true){debug = flag;}
+
+  void SetDoCumulative(bool flag=true){m_do_cumulative = flag;}
+
 
  private:
 
@@ -36,6 +40,7 @@ class FileParser
   TFile* m_file;
   TString m_process;
   bool debug;
+  bool m_do_cumulative;
   TObjArray* m_hists;
   
 

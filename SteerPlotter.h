@@ -79,6 +79,9 @@ public:
     void SetSysError(Float_t err);
     Float_t GetSysError();
 
+    void SetDoCumulative(Bool_t flag);
+    Bool_t GetDoCumulative();
+
 private:
 
     Bool_t    bShapeNorm;         // Shape normalization?
@@ -90,6 +93,7 @@ private:
     Bool_t    bDrawLegend;        // draw the legend everywhere?
     Bool_t    bFitPtBalanceHists; // fit Pt-balance histograms?
     Bool_t    bJetShapesPerSlice; // plot each slide of the jet shape histograms?
+    Bool_t    bDoCumulative;      // do cumulative distributions instead of normal plots
     Int_t     fNumOfSamples;      // how many analysis samples should be plotted
     Float_t   fLumi;              // integrated luminosity of sample
     Float_t   fSysError;          // systematic error on normalisation

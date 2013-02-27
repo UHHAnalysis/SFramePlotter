@@ -99,6 +99,7 @@ void SteerPlotter::Print(Option_t* opt) const
   }
   cout << (bDrawLegend? "Legend will be plotted everywhere." : "Legend will be plotted on first plot only") << endl;
   cout << (bShapeNorm? "Shape normalization" : "No shape normalization") << endl;
+  cout << (bDoCumulative? "Cumulative distributions will be plotted." : "Normal distributions will be plotted") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
   cout << (bPortrait?  "Setting the page to portrait mode" : "Setting the page to landscape mode") << endl;
   cout << "--------------------------------------------------------------------------------------------------------------------" << endl;
@@ -128,6 +129,9 @@ Bool_t SteerPlotter::GetDrawLumi(){return bDrawLumi;}
 
 void SteerPlotter::SetDrawLegend(Bool_t flag){bDrawLegend = flag;}
 Bool_t SteerPlotter::GetDrawLegend(){return bDrawLegend;}
+
+void SteerPlotter::SetDoCumulative(Bool_t flag){bDoCumulative = flag;}
+Bool_t SteerPlotter::GetDoCumulative(){return bDoCumulative;}
 
 void SteerPlotter::SetJetShapesPerSlice(Bool_t flag){bJetShapesPerSlice = flag;}
 Bool_t SteerPlotter::GetJetShapesPerSlice(){return bJetShapesPerSlice;}
