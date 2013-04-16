@@ -40,6 +40,7 @@ SPlotter::SPlotter()
   bDrawLumi    = true;
   bDrawLegend  = true;
   bPlotRatio   = false;
+  bSingleEPS   = false;
   need_update  = true;
 
 }
@@ -311,30 +312,28 @@ void SPlotter::SetupCanvas()
   m_pad1 = new TPad("pad1", "Control Plots 1", x1, y4, x2, y6);
   m_pad2 = new TPad("pad2", "Control Plots 2", x1, y1, x2, y3);
   
- 
   // set margins for portrait mode
   if (bPortrait){
-
+    
     m_pad1->SetTopMargin(0.05); m_pad1->SetBottomMargin(0.16);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
     m_pad2->SetTopMargin(0.05); m_pad2->SetBottomMargin(0.16);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
-
+    
     m_rp1_top->SetTopMargin(0.065); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.19); m_rp1_top->SetRightMargin(0.05);
     m_rp2_top->SetTopMargin(0.065); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.19); m_rp2_top->SetRightMargin(0.05);
     m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.19);  m_rp1->SetRightMargin(0.05);
     m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.19);  m_rp2->SetRightMargin(0.05);    
-	    
-  // margins for landscape
+    
+      // margins for landscape
   } else {
-
+    
     m_rp1_top->SetTopMargin(0.065); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.13); m_rp1_top->SetRightMargin(0.05);        
     m_rp2_top->SetTopMargin(0.065); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.13); m_rp2_top->SetRightMargin(0.05);
     
     if (bPlotRatio){
-      m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.13);  m_rp1->SetRightMargin(0.05);
-      m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.13);  m_rp2->SetRightMargin(0.05);
+	m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.13);  m_rp1->SetRightMargin(0.05);
+	m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.13);  m_rp2->SetRightMargin(0.05);
     }
   }
-  
 
   
   if (debug){
@@ -361,9 +360,82 @@ void SPlotter::SetupCanvas()
 
 }
 
-void SPlotter::OpenPostscript(TString dir)
+void SPlotter::SetupCanvasForEPS()
+{
+  // set up a canvas for single EPS files
+  // optimised plots for including in theses or publications and documents
+  // different possibilities 
+  // ratio/no ratio plots
+
+  Int_t CanWidth;
+  Int_t CanHeight;
+  CanWidth = 400;
+  CanHeight = 400;
+
+  // set up the canvas
+  m_can = new TCanvas("canvas","Control Plots", CanWidth, CanHeight);
+
+  Float_t yplot = 0.65;
+  Float_t yratio = 0.34;
+
+                                                //  coordinates:
+  // set up the coordinates of the two pads:    //  			 
+  Float_t y1, y2, y3;                           //  y3 +-------------+	
+  y3 = 0.99;                                    //     |             |	
+  y2 = y3-yplot;                                //     |     pad1    |	
+  y1 = y2-yratio;                               //  y2 |-------------|	
+  Float_t x1, x2;                               //     |     rp1     |	
+  x1 = 0.01;                                    //  y1 +-------------+	
+  x2 = 0.99;                                    //     x1            x2	
+                                                // 			
+                                                // No Pad 2!            
+                                                                                                                                             
+      
+  m_rp1_top = new TPad("pad1", "Control Plots 2", x1, y2, x2, y3);
+  m_rp1 = new TPad("rp1", "Ratio2", x1, y1, x2, y2);
+  m_pad1 = new TPad("pad1", "Control Plots 2", x1, y1, x2, y3);
+ 
+  m_rp2_top = new TPad("pad1", "Control Plots 2", x1, y2, x2, y3);
+  m_rp2 = new TPad("rp1", "Ratio2", x1, y1, x2, y2);
+  m_pad2 = new TPad("pad1", "Control Plots 2", x1, y1, x2, y3);
+
+      
+  m_pad1->SetTopMargin(0.05); m_pad1->SetBottomMargin(0.16);  m_pad1->SetLeftMargin(0.19); m_pad1->SetRightMargin(0.05);
+  m_pad2->SetTopMargin(0.05); m_pad2->SetBottomMargin(0.16);  m_pad2->SetLeftMargin(0.19); m_pad2->SetRightMargin(0.05);
+  
+  m_rp1_top->SetTopMargin(0.065); m_rp1_top->SetBottomMargin(0.0);  m_rp1_top->SetLeftMargin(0.19); m_rp1_top->SetRightMargin(0.05);
+  m_rp2_top->SetTopMargin(0.065); m_rp2_top->SetBottomMargin(0.0);  m_rp2_top->SetLeftMargin(0.19); m_rp2_top->SetRightMargin(0.05);
+  m_rp1->SetTopMargin(0.0);    m_rp1->SetBottomMargin(0.35);  m_rp1->SetLeftMargin(0.19);  m_rp1->SetRightMargin(0.05);
+  m_rp2->SetTopMargin(0.0);    m_rp2->SetBottomMargin(0.35);  m_rp2->SetLeftMargin(0.19);  m_rp2->SetRightMargin(0.05);    
+  
+  if (debug){
+    m_rp1_top->SetFillColor(kYellow);
+    m_rp2_top->SetFillColor(kOrange);
+    if (bPlotRatio){
+      m_rp1->SetFillColor(kGray);
+      m_rp2->SetFillColor(kGray);
+    }
+  }
+
+  m_pad1->Draw();
+  m_pad2->Draw();
+
+  m_rp1_top->Draw(); 
+  m_rp2_top->Draw();
+  
+  if (bPlotRatio){
+    m_rp1->Draw();
+    m_rp2->Draw();
+  }
+
+  return;
+
+}
+
+void SPlotter::OpenPostscript(TString dir, TString hname)
 {
   // create a new ps file with the directory in the name
+  // optional: for EPS files add the name of the histogram
 
   TString filename(m_ps_name);
   filename.ReplaceAll(".ps","");
@@ -371,28 +443,40 @@ void SPlotter::OpenPostscript(TString dir)
   filename.Append(dir);
   filename.Append(".ps");
 
-  TString text(dir);
-  text.Prepend("Plotting all histograms in directory ");
-  
-  cout << "\n+-------------------------- SFrame Plotter ---------------------------+" << endl;
-  cout <<   "| " << setw(60)<< text                                    << "        |" << endl;
-  cout <<   "+---------------------------------------------------------------------+" << endl;
-  m_page = 0;
+  if (bSingleEPS){
+    filename.ReplaceAll(".ps","");
+    filename.Append("_");
+    filename.Append(hname);
+    filename.Append(".eps");
+    
+  } else {
+    
+    TString text(dir);
+    text.Prepend("Plotting all histograms in directory ");
+    cout << "\n+-------------------------- SFrame Plotter ---------------------------+" << endl;
+    cout <<   "| " << setw(60)<< text                                    << "        |" << endl;
+    cout <<   "+---------------------------------------------------------------------+" << endl;
+    m_page = 0;
+  }
       
   m_ps = NULL;
-  if (bPortrait){
-    m_ps = new TPostScript(filename, 111);  // ps output
-    m_ps->Range(20.0, 30.0);
+  if (bSingleEPS){
+    m_ps = new TPostScript(filename, 113); // eps output
   } else {
-    m_ps = new TPostScript(filename, 112);  // ps output
-    m_ps->Range(27.0, 18.0);
+    if (bPortrait){
+      m_ps = new TPostScript(filename, 111);  // ps output
+      m_ps->Range(20.0, 30.0);
+    } else {
+      m_ps = new TPostScript(filename, 112);  // ps output
+      m_ps->Range(27.0, 18.0);
+    }
   }
 
 }
 
 void SPlotter::ClosePostscript()
 {
-  // close the ps file and set page number to 0
+  // close the ps file and set page number to 0  
   if (m_ps){
     m_ps->Close();
     delete m_ps;
@@ -440,29 +524,44 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
 
     if (bShapeNorm) ShapeNormalise(hists);
 
-    // new directory? create new ps file!
-    TString dir = hists[0]->GetDir();
-    if (dir.CompareTo(current_dir)!=0){
-      if (iplot!=1) DrawPageNum();
-      Cleanup();
-      SetupCanvas();
-      OpenPostscript(dir);
-      current_dir = dir;
-      iplot = 1;
-      bleg = true;
-    }
-
     int ipad = GetCurrentPad(iplot);
+    
     if (debug) cout << "Plotting histograms " << hists[0]->GetName() 
 		    << " iplot = " << iplot << " ipad = " << ipad << endl;
+    
+    // new directory? create new ps file for ps-book!
+    if (!bSingleEPS){
+      TString dir = hists[0]->GetDir();
+      if (dir.CompareTo(current_dir)!=0){
+	if (iplot!=1) DrawPageNum();
+	Cleanup();
+	SetupCanvas();
+	OpenPostscript(dir);
+	current_dir = dir;
+	iplot = 1;
+	bleg = true;
+      }
 
-    // new page every second plot
-    if (iplot%2==1){
-      if (debug) cout << "Creating new page with number " << m_page << endl;
-      DrawPageNum();
-      if (need_update) m_can->Update();
-      m_ps->NewPage();
-      ++m_page;
+      // new page every second plot
+      if (iplot%2==1){
+	if (debug) cout << "Creating new page with number " << m_page << endl;
+	DrawPageNum();
+	if (need_update) m_can->Update();
+	m_ps->NewPage();
+	++m_page;
+      }
+
+    // new file for each plot in single EPS mode
+    } else {
+      TString dir = hists[0]->GetDir();
+      TString hname = hists[0]->GetName();
+      Cleanup();
+      SetupCanvasForEPS();
+      if (debug) cout << "Creating new eps file with name " << dir << "_" << hname << endl;
+      OpenPostscript(dir, hname);
+      current_dir = dir;
+      iplot = 1;
+      bleg = true;          
     }
 
     // cosmetics
@@ -488,7 +587,6 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
       if (bPlotRatio) PlotRatios(hists, ipad);
     
     }
-
 
     ++iplot;
   }
@@ -728,7 +826,11 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     rdhist->SetBinError(ibin, rel_err * rdhist->GetBinContent(ibin) );
   }
   rdhist->GetYaxis()->SetTitle(rd->GetProcessName() + " / MC");
-  RatioCosmetics(rdhist);
+  if (bSingleEPS){
+    SingleEPSRatioCosmetics(rdhist);
+  } else {
+    RatioCosmetics(rdhist);
+  }
 
   // one histogram for the MC statistical error and one for the total error
   SHist* mcerr = new SHist(rdhist);
@@ -787,8 +889,14 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
 
   float top = 0.89;
   if (!bPlotRatio && bDrawLumi) top = 0.86;
+  if (bSingleEPS){
+    top = 0.92;
+    if (bPlotRatio) top = 0.88;
+    if (bDrawLumi) top = 0.84;
+  }
   float ysize = yfrac*narr;
   float xleft = 0.7;
+  if (bSingleEPS) xleft = 0.6;
   float xright = 0.92;
   if (!bPortrait){
     top = 0.99;
@@ -803,6 +911,7 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
   leg->SetFillStyle(0);
+  if (bSingleEPS) leg->SetTextSize(0.045);
 
   for (Int_t i=0; i<narr; ++i){
     SHist* sh = hists[i];
@@ -821,6 +930,7 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
       entry->SetMarkerColor(sh->GetHist()->GetLineColor());
       entry->SetMarkerStyle(marker);
       entry->SetMarkerSize(1.0);
+      if (bSingleEPS) entry->SetMarkerSize(0.8);
     } else {
       
       if (sh->IsUsedInStack()){
@@ -879,6 +989,7 @@ void SPlotter::DoCosmetics(vector<SHist*> hists)
     GeneralCosmetics(sh->GetHist());
     if (bPortrait) PortraitCosmetics(sh->GetHist());
     if (!bPortrait) LandscapeCosmetics(sh->GetHist());
+    if (bSingleEPS) SingleEPSCosmetics(sh->GetHist());
     if (sh->IsYieldPlot()) YieldCosmetics(sh->GetHist());
   }
 
@@ -1174,6 +1285,91 @@ void SPlotter::PortraitCosmetics(TH1* hist)
 
   }
   
+}
+
+void SPlotter::SingleEPSCosmetics(TH1* hist)
+{
+
+  // top histogram of the ratio plot
+  if (bPlotRatio){
+    
+    // x-axis
+    hist->GetXaxis()->SetTickLength(0.05);
+
+    // y-axis
+    hist->GetYaxis()->SetTitleSize(0.07);
+    hist->GetYaxis()->SetLabelSize(0.062);
+    hist->GetYaxis()->SetLabelOffset(0.01);   
+    hist->GetYaxis()->SetTitleOffset(1.15);
+    hist->GetYaxis()->SetTickLength(0.02);
+  
+  // only this histogram
+  } else {
+
+    hist->GetXaxis()->SetLabelSize(0.05);
+    hist->GetXaxis()->SetLabelOffset(0.008);
+    hist->GetXaxis()->SetTickLength(0.03);
+    hist->GetXaxis()->SetTitleSize(0.05);
+    hist->GetXaxis()->SetTitleOffset(1.2);
+    
+    hist->GetYaxis()->SetTitleOffset(1.8);
+    hist->GetYaxis()->SetTitleSize(0.05);
+    hist->GetYaxis()->SetLabelSize(0.045);
+    hist->GetYaxis()->SetTickLength(0.02);
+    hist->GetYaxis()->SetLabelOffset(0.011);
+
+  }
+  
+}
+
+void SPlotter::SingleEPSRatioCosmetics(TH1* hist)
+{
+
+  //hist->GetYaxis()->SetRangeUser(0.3, 1.7);
+  hist->GetYaxis()->SetRangeUser(0.05, 1.95);
+  hist->SetMarkerSize(0.7);
+
+  // cosmetics for portrait mode 
+  if (bPortrait){
+    hist->SetTitle("");
+    
+    // x-axis
+    hist->GetXaxis()->SetLabelSize(0.12);
+    hist->GetXaxis()->SetTickLength(0.08);
+    hist->GetXaxis()->SetTitleSize(0.12);
+    hist->GetXaxis()->SetTitleOffset(1.25);
+	  
+    // y-axis
+    hist->GetYaxis()->CenterTitle();
+    hist->GetYaxis()->SetTitleSize(0.12);
+    hist->GetYaxis()->SetTitleOffset(0.66);
+    hist->GetYaxis()->SetLabelSize(0.11);
+    //hist->GetYaxis()->SetNdivisions(210);
+    hist->GetYaxis()->SetNdivisions(505);
+    hist->GetYaxis()->SetTickLength(0.02);
+    hist->GetYaxis()->SetLabelOffset(0.011);
+
+    // cosmetics for landscape mode 
+  } else {
+    
+    hist->SetTitle("");
+    hist->SetTitleOffset(1.1, "X");
+    hist->SetTitleOffset(0.5, "Y");
+    hist->SetLabelOffset(0.02, "X");
+    hist->SetLabelOffset(0.01, "Y");
+	  
+    hist->GetXaxis()->SetLabelSize(0.14);
+    hist->GetXaxis()->SetTickLength(0.07);
+    hist->GetXaxis()->SetTitleSize(0.15);
+	  
+    hist->GetYaxis()->CenterTitle();
+    hist->GetYaxis()->SetTitleSize(0.11);
+    hist->GetYaxis()->SetLabelSize(0.12);
+    hist->GetYaxis()->SetNdivisions(505);
+    hist->GetYaxis()->SetTickLength(0.03);
+    
+  }
+
 }
 
 

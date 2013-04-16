@@ -36,7 +36,8 @@ class SPlotter
   void Cleanup();
   void SetupGlobalStyle();
   void SetupCanvas();
-  void OpenPostscript(TString dir);
+  void SetupCanvasForEPS();
+  void OpenPostscript(TString dir, TString hname="");
   void ClosePostscript();
   int GetCurrentPad(int);
   void DrawPageNum();
@@ -52,6 +53,8 @@ class SPlotter
   void LandscapeCosmetics(TH1* hist);
   void YieldCosmetics(TH1* hist);
   void RatioCosmetics(TH1* hist);
+  void SingleEPSCosmetics(TH1* hist);
+  void SingleEPSRatioCosmetics(TH1* hist);
   void CopyStyle(TH1& h1, TH1* h2);
   bool SetMinMax(std::vector<SHist*> hists);
   void SetLogAxes(std::vector<SHist*> hists);
@@ -64,6 +67,7 @@ class SPlotter
   void SetDebug(bool flag=true){debug=flag;}
   void SetShapeNorm(Bool_t flag = true){bShapeNorm = flag;}
   void SetPortraitMode(Bool_t flag = true){bPortrait = flag;}
+  void SetSingleEPSMode(Bool_t flag = true){bSingleEPS = flag;}
   void SetDrawEntries(Bool_t flag = true){bDrawEntries = flag;}
   void SetPlotRatio(Bool_t flag=true){bPlotRatio = flag;}
   void SetDrawLumi(Bool_t flag=true){bDrawLumi = flag;}
@@ -93,6 +97,7 @@ class SPlotter
   bool  debug;              // output of debugging information
   bool  bShapeNorm;         // use shape normalization
   bool  bPortrait;          // portrait or landscape mode
+  bool  bSingleEPS;         // single eps file for each plot
   bool  bDrawEntries;       // display the number of entries 
   bool  bDrawLumi;          // display the lumi information 
   float m_lumi;             // total integrated luminosity

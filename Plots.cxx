@@ -137,6 +137,8 @@ int main(int argc, char** argv)
   pl.SetPsFilename(PsFilename);
   pl.SetLumi(Lumi);
   pl.SetNormError(SysErr);
+
+  //pl.SetSingleEPSMode(true);
   
   // _______________ do the plotting ______________
   
