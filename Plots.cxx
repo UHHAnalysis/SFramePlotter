@@ -138,11 +138,14 @@ int main(int argc, char** argv)
   pl.SetLumi(Lumi);
   pl.SetNormError(SysErr);
 
-  //pl.SetSingleEPSMode(true);
+  pl.SetSingleEPSMode(true);
   
   // _______________ do the plotting ______________
   
   pl.ProcessAndPlot(harr);
+
+  cout << "\nDone processing all plots. Wrote files to: " << endl;
+  cout << PsFilename << endl << endl;
 
   // Done! Exit Root
   gSystem->Exit(0);

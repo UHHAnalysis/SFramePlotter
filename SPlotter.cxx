@@ -9,6 +9,7 @@
 #include <TLegend.h>
 #include <TLegendEntry.h>
 #include <TLatex.h>
+#include <TEllipse.h>
 #include <TF1.h>
 #include <TMath.h>
 #include <TColor.h>
@@ -607,20 +608,92 @@ void SPlotter::PlotLumiYield(SHist* hist, int ipad)
 
   hist->Draw();
 
-  // do a fit
+  // calculate the average
   TH1* h = hist->GetHist();
+  double sum=0;
+  int bins=0;
+  for (int i=1; i<h->GetNbinsX()+1; ++i){
+    if (h->GetBinContent(i)>0){
+      sum += h->GetBinContent(i);
+      bins++;
+    }
+  }
+  double av = sum / bins;
+
+  // calculate average with outlier-rejection (4sigma)
+  sum=0;
+  bins=0;
+  for (int i=1; i<h->GetNbinsX()+1; ++i){
+    if (h->GetBinContent(i)>0){
+      double dev = TMath::Abs( (h->GetBinContent(i) - av)/h->GetBinError(i) );
+      if (dev<4){
+	sum += h->GetBinContent(i);
+	bins++;
+      } else {
+	cout << "Lumi yield: outlier in bin " << i << " with content " << h->GetBinContent(i) << " average = " << av << endl;
+      } 
+    }
+  }
+  av = sum / bins;
+
+  // calculate error on mean and chi2
+  double dev = 0;
+  double chi2 = 0;
+  for (int i=1; i<h->GetNbinsX()+1; ++i){
+    if (h->GetBinContent(i)>0){
+      double pull = (h->GetBinContent(i) - av)/h->GetBinError(i);
+      if (TMath::Abs(pull)<4){
+	dev += TMath::Power(h->GetBinContent(i)-av, 2);
+	chi2 += pull*pull;
+      }
+    }
+  }
+  double err = TMath::Sqrt(dev/bins);
+
+  // highlight points with deviations of more than 3, 4 and 5 sigma 
+  double xr = h->GetXaxis()->GetXmax() - h->GetXaxis()->GetXmin();
+  double wi = gPad->GetAbsWNDC() * (1 - gPad->GetLeftMargin() - gPad->GetRightMargin());
+  double he = gPad->GetAbsHNDC() * (1 - gPad->GetTopMargin() - gPad->GetBottomMargin());
+  double ar = wi/he;
+  double fudge = 1.;
+  if (bSingleEPS) fudge = 1.2;
+  double r1 = 0.02*xr*fudge;
+  double yr = h->GetMaximum()-h->GetMinimum();
+  double r2 = 0.016*yr*ar*fudge;
+  for (int i=1; i<h->GetNbinsX()+1; ++i){
+    if (h->GetBinContent(i)>0){
+      double pull = (h->GetBinContent(i) - av)/h->GetBinError(i);
+      if (TMath::Abs(pull)>5){
+	TEllipse* circ = new TEllipse(h->GetXaxis()->GetBinCenter(i), h->GetBinContent(i), r1, r2);
+	circ->SetFillColor(kWhite);
+	circ->SetLineColor(kRed);
+	circ->Draw();
+      } else if (TMath::Abs(pull)>4){
+	TEllipse* circ = new TEllipse(h->GetXaxis()->GetBinCenter(i), h->GetBinContent(i), r1, r2);
+	circ->SetFillColor(kWhite);
+	circ->SetLineColor(kOrange);
+	circ->Draw();
+      } else if (TMath::Abs(pull)>3){
+	TEllipse* circ = new TEllipse(h->GetXaxis()->GetBinCenter(i), h->GetBinContent(i), r1, r2);
+	circ->SetFillColor(kWhite);
+	circ->SetLineColor(kSpring);
+	circ->Draw();
+      }
+    }
+  }
+
+  // draw the average
   TF1* f = new TF1("average", "[0]", h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax());
   f->SetLineColor(kAzure+1);
   f->SetLineWidth(1);
-  h->Fit(f);
+  f->SetParameter(0, av);
+  f->Draw("same");
 
-  double val = f->GetParameter(0);
-  double err = f->GetParError(0);
 
   TF1* fup = new TF1("up", "[0]", h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax());
   TF1* fdown = new TF1("down", "[0]", h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax());
-  fup->SetParameter(0, val+err);
-  fdown->SetParameter(0, val-err);
+  fup->SetParameter(0, av+err);
+  fdown->SetParameter(0, av-err);
   fup->SetLineColor(kAzure+1);
   fdown->SetLineColor(kAzure+1);
   fup->SetLineWidth(1);
@@ -635,15 +708,18 @@ void SPlotter::PlotLumiYield(SHist* hist, int ipad)
   text->SetNDC();
   text->SetTextColor(kBlack);
   text->SetTextSize(0.05);
+  if (bSingleEPS)  text->SetTextSize(0.04);
   text->SetTextAlign(11);
   TString info = TString::Format("#chi^{2} / ndf");
-  text->DrawLatex(0.57, 0.30, info.Data());
-  info = TString::Format("%3.1f / %d", f->GetChisquare(), f->GetNDF());
-  text->DrawLatex(0.72, 0.30, info.Data());
+  text->DrawLatex(0.5, 0.30, info.Data());
+  info = TString::Format("%3.1f / %d", chi2, bins-1);
+  text->DrawLatex(0.65, 0.30, info.Data());
   info = TString::Format("average");
-  text->DrawLatex(0.57, 0.23, info.Data());
-  info = TString::Format("%4.1f #pm %4.1f", val, err);
-  text->DrawLatex(0.72, 0.23, info.Data());
+  text->DrawLatex(0.5, 0.23, info.Data());
+  info = TString::Format("%4.1f #pm %4.1f", av, err);
+  text->DrawLatex(0.65, 0.23, info.Data());
+
+  hist->Draw("same");
 
   return;
 
@@ -1387,6 +1463,14 @@ void SPlotter::YieldCosmetics(TH1* hist)
     hist->GetYaxis()->SetLabelSize(0.045);
     hist->GetYaxis()->SetTickLength(0.02);
     hist->GetYaxis()->SetLabelOffset(0.011);
+
+    if (bSingleEPS){
+      hist->GetYaxis()->SetTitleOffset(1.8);
+      hist->GetYaxis()->SetTitleSize(0.055);
+      hist->GetYaxis()->SetLabelSize(0.05);
+      hist->GetYaxis()->SetTickLength(0.02);
+      hist->GetYaxis()->SetLabelOffset(0.011);
+    }
 
     hist->GetXaxis()->SetTitle("integrated luminosity [fb^{-1}]");
     double dlum = hist->GetXaxis()->GetBinWidth(1);
