@@ -63,6 +63,9 @@ public:
 
     void SetSamplesWeight(const char* in);
     TArrayF GetSamplesWeight();
+
+    void SetSamplesUnc(const char* in);
+    TArrayF GetSamplesUnc();
     
     void SetSubstractBkgd(Bool_t flag);
     Bool_t GetSubstractBkgd();
@@ -82,6 +85,9 @@ public:
     void SetDoCumulative(Bool_t flag);
     Bool_t GetDoCumulative();
 
+    void SetSingleEPS(Bool_t flag);
+    Bool_t GetSingleEPS();
+
 private:
 
     Bool_t    bShapeNorm;         // Shape normalization?
@@ -94,6 +100,7 @@ private:
     Bool_t    bFitPtBalanceHists; // fit Pt-balance histograms?
     Bool_t    bJetShapesPerSlice; // plot each slide of the jet shape histograms?
     Bool_t    bDoCumulative;      // do cumulative distributions instead of normal plots
+    Bool_t    bSingleEPS;         // make one EPS file for each histogram
     Int_t     fNumOfSamples;      // how many analysis samples should be plotted
     Float_t   fLumi;              // integrated luminosity of sample
     Float_t   fSysError;          // systematic error on normalisation
@@ -104,6 +111,7 @@ private:
     Bool_t    bSubstractBkgd;     // substract all background samples?
 
     TArrayF   fSamplesWeight;     // weights for the different samples
+    TArrayF   fSamplesUnc;        // uncertainty on the normalisation of various samples
     
     TObjArray fInputFiles;        // input filenames
     TString   fCycleName;         // name of the cycle, can be used as prefix for the filenames

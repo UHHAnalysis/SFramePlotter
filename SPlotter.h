@@ -45,6 +45,7 @@ class SPlotter
   void ShapeNormalise(std::vector<SHist*> hists);
   void DrawLegend(std::vector<SHist*> hists);
   void DrawLumi();
+  double CalcNormErrorForBin(SHist* stack, int i);
   
   // cosmetics
   void DoCosmetics(std::vector<SHist*> hists);

@@ -90,19 +90,21 @@ int main(int argc, char** argv)
   Bool_t RatioPlot           = steerfile->GetRatioPlot();
   Bool_t PortraitMode        = steerfile->GetPortrait();
   Bool_t DrawEntries         = steerfile->GetDrawEntries();
-  Bool_t PtBalanceFitOpt     = steerfile->GetFitPtBalanceHists();
-  Bool_t SubstractBkgd       = steerfile->GetSubstractBkgd();
-  Bool_t JetShapesPerSlice   = steerfile->GetJetShapesPerSlice();
+  //Bool_t PtBalanceFitOpt     = steerfile->GetFitPtBalanceHists();
+  //Bool_t SubstractBkgd       = steerfile->GetSubstractBkgd();
+  //Bool_t JetShapesPerSlice   = steerfile->GetJetShapesPerSlice();
   TObjArray* SampleNames     = steerfile->GetSampleNames();
   TObjArray* SamplesToStack  = steerfile->GetSamplesToStack(); 
   TArrayI HistColors         = steerfile->GetHistColors();
   TArrayI HistMarkers        = steerfile->GetHistMarkers();
   TArrayF SamplesWeight      = steerfile->GetSamplesWeight();
+  TArrayF SamplesUnc         = steerfile->GetSamplesUnc();
   Bool_t DrawLumi            = steerfile->GetDrawLumi();
   Float_t Lumi               = steerfile->GetLumi();
   Float_t SysErr             = steerfile->GetSysError();
   Bool_t DrawLegend          = steerfile->GetDrawLegend();
   Bool_t DoCumulative        = steerfile->GetDoCumulative();
+  Bool_t SingleEPS           = steerfile->GetSingleEPS();
 
   // _______________ loop over files and get all histograms ______________
 
@@ -115,7 +117,9 @@ int main(int argc, char** argv)
     TString legname = ((TObjString*)SampleNames->At(i))->GetString();
     fp.OpenFile(file, CycleName);
     fp.BrowseFile();
-    fp.SetInfo(legname, SamplesWeight[i], HistColors[i], HistMarkers[i]);
+    float unc = 0.;
+    if (SamplesUnc.GetSize()!=0) unc = SamplesUnc[i];
+    fp.SetInfo(legname, SamplesWeight[i], HistColors[i], HistMarkers[i], unc);
     fp.CloseFile();
     harr.push_back( fp.GetHists() );
   }
@@ -137,8 +141,8 @@ int main(int argc, char** argv)
   pl.SetPsFilename(PsFilename);
   pl.SetLumi(Lumi);
   pl.SetNormError(SysErr);
+  pl.SetSingleEPSMode(SingleEPS);
 
-  pl.SetSingleEPSMode(true);
   
   // _______________ do the plotting ______________
   

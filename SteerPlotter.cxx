@@ -19,6 +19,8 @@ SteerPlotter::SteerPlotter()
    bDrawEntries = false;
    bDrawLumi = false;
    bDrawLegend = true;
+   bSingleEPS = false;
+   bDoCumulative = false;
    fNumOfSamplesToStack = 0;
    fLumi = 0;
    fSysError = -1.;
@@ -41,6 +43,12 @@ void SteerPlotter::Print(Option_t* opt) const
   if (fNumOfSamples != fSamplesWeight.GetSize()){
     cout << "Error: Number of given weights is not the same as number of samples." << endl;
     exit(3);
+  }
+  if (fSamplesUnc.GetSize()!=0){
+    if (fNumOfSamples != fSamplesUnc.GetSize()){
+      cout << "Error: Number of given uncertainties for normalisation of samples is not the same as number of samples." << endl;
+      exit(3);
+    }
   }
   if (fNumOfSamples != fHistColors.GetSize()){
     cout << "Error: Number of colours given is not the same as number of samples." << endl;
@@ -69,7 +77,12 @@ void SteerPlotter::Print(Option_t* opt) const
 	 << "   name =  " << setw(15) << name
     	 << "   color = " << setw(4) << fHistColors.At(i) 
 	 << "   marker = " << setw(4) << fHistMarkers.At(i) 
-	 << "   with weight " << fSamplesWeight.At(i) << endl;
+	 << "   with weight " << fSamplesWeight.At(i);
+    if (fSamplesUnc.GetSize()!=0){
+      cout << "  and uncertainty of " << fSamplesUnc.At(i)*100 << "%" << endl;
+    } else {
+      cout << endl;
+    }
   }
   cout << "Output Ps File:                " << fOutputPsFile << endl;
   cout << endl;
@@ -100,6 +113,7 @@ void SteerPlotter::Print(Option_t* opt) const
   cout << (bDrawLegend? "Legend will be plotted everywhere." : "Legend will be plotted on first plot only") << endl;
   cout << (bShapeNorm? "Shape normalization" : "No shape normalization") << endl;
   cout << (bDoCumulative? "Cumulative distributions will be plotted." : "Normal distributions will be plotted") << endl;
+  cout << (bSingleEPS? "Creating one eps file per histogram." : "Creating one ps file with all histograms for each histogram collection.") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
   cout << (bPortrait?  "Setting the page to portrait mode" : "Setting the page to landscape mode") << endl;
   cout << "--------------------------------------------------------------------------------------------------------------------" << endl;
@@ -132,6 +146,9 @@ Bool_t SteerPlotter::GetDrawLegend(){return bDrawLegend;}
 
 void SteerPlotter::SetDoCumulative(Bool_t flag){bDoCumulative = flag;}
 Bool_t SteerPlotter::GetDoCumulative(){return bDoCumulative;}
+
+void SteerPlotter::SetSingleEPS(Bool_t flag){bSingleEPS = flag;}
+Bool_t SteerPlotter::GetSingleEPS(){return bSingleEPS;}
 
 void SteerPlotter::SetJetShapesPerSlice(Bool_t flag){bJetShapesPerSlice = flag;}
 Bool_t SteerPlotter::GetJetShapesPerSlice(){return bJetShapesPerSlice;}
@@ -171,6 +188,9 @@ TObjArray* SteerPlotter::GetSamplesToStack(){return &fSamplesToStack;}
 
 void SteerPlotter::SetSamplesWeight(const char* in){ this->StringToArray(in, fSamplesWeight);}
 TArrayF SteerPlotter::GetSamplesWeight(){return fSamplesWeight;}
+
+void SteerPlotter::SetSamplesUnc(const char* in){ this->StringToArray(in, fSamplesUnc);}
+TArrayF SteerPlotter::GetSamplesUnc(){return fSamplesUnc;}
 
 void SteerPlotter::SetSubstractBkgd(Bool_t flag){ bSubstractBkgd = flag; }
 Bool_t SteerPlotter::GetSubstractBkgd(){ return bSubstractBkgd; }

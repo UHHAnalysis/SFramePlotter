@@ -22,7 +22,7 @@ class FileParser
   
   bool FileExists(TString name);
 
-  void SetInfo(TString legname, double weight, int colour, int marker);
+  void SetInfo(TString legname, double weight, int colour, int marker, float unc = 0.);
   TH1* Rebin(TH1* hist, TString dirname);
   void MakeCumulativeHist(TH1* hist);
 

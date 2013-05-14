@@ -225,13 +225,14 @@ TH1* FileParser::Rebin(TH1* hist, TString dirname)
 
 }
 
-void FileParser::SetInfo(TString legname, double weight, int colour, int marker)
+void FileParser::SetInfo(TString legname, double weight, int colour, int marker, float unc)
 {
   
   for (int i=0; i<m_hists->GetEntries(); ++i){
     SHist* sh = (SHist*)m_hists->At(i);
     sh->SetLegName(legname);
     sh->SetWeight(weight);
+    sh->SetUnc(unc);
     if (weight>0) sh->GetHist()->Scale(weight);
     sh->GetHist()->SetMarkerColor(colour);
     sh->GetHist()->SetLineColor(colour);

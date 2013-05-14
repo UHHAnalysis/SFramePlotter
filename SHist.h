@@ -41,6 +41,9 @@ class SHist : public TObject
   void SetWeight(double);
   double GetWeight();
 
+  void SetUnc(double unc, int i=0);
+  double GetUnc(int i=0);
+
   void SetDoDraw(bool);
   bool DoDraw();
 
@@ -62,6 +65,7 @@ class SHist : public TObject
   TH1* m_hist;
   THStack* m_stack;
   double m_weight;
+  TArrayD m_unc_arr;
   TString m_process;
   TString m_leg_name;
   TString m_dir;

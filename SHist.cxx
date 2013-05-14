@@ -169,6 +169,21 @@ double SHist::GetWeight()
   return m_weight;
 }
 
+void SHist::SetUnc(double unc, int i)
+{
+  // set the uncertainty on the normalisation of the sample
+  // usually just one number (array at position 0), 
+  // but can be an array in case the SHist is a stack
+  if (i<m_unc_arr.GetSize()+1) m_unc_arr.Set(m_unc_arr.GetSize()+1);
+  m_unc_arr.AddAt(unc, i);
+}
+
+double SHist::GetUnc(int i)
+{
+  if (m_unc_arr.GetSize()==0) return 0.;
+  return m_unc_arr.At(i);
+}
+
 void SHist::SetDrawMarker(bool flag)
 {
   m_draw_marker = flag;

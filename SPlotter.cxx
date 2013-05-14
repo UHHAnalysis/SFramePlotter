@@ -134,10 +134,14 @@ void SPlotter::StackHists(std::vector<TObjArray*>& hists, int index)
     stack->GetStack()->Add(hist->GetHist());
     hist->SetIsUsedInStack(true);
     hist->SetDoDraw(false);
-    if (debug) cout << "stacking hist " << histname << " on " << stackname 
+    stack->SetUnc(hist->GetUnc(), stack->GetStack()->GetHists()->GetSize()-1);
+    if (debug) cout << "stacking hist " << histname << " on " << stackname << " for process " << hist->GetProcessName()
 		    << " (dir = " << stack->GetDir() << ")" << endl;
+    if (i==0){
+      cout << "stacking process " << hist->GetProcessName() << " with weight " << hist->GetWeight() << " and uncertainty " << hist->GetUnc() << endl;
+    }
   }  
-
+  
   return;
 
 }
@@ -828,7 +832,8 @@ void SPlotter::DrawNormError(SHist* stack)
     Double_t sys = 0; 
     if (m_syserr>0) sys = m_syserr*e->GetBinContent(i);
     Double_t stat = e->GetBinError(i);
-    Double_t err = TMath::Sqrt(sys*sys + stat*stat);
+    Double_t norm_err = CalcNormErrorForBin(stack, i);
+    Double_t err = TMath::Sqrt(norm_err*norm_err + sys*sys + stat*stat);
     e->SetBinError(i, err);
   }
   static Int_t LightGray     = TColor::GetColor( "#aaaaaa" );
@@ -838,6 +843,19 @@ void SPlotter::DrawNormError(SHist* stack)
   e->SetFillStyle(3245);
   e->Draw("E2 same");
 
+}
+
+double SPlotter::CalcNormErrorForBin(SHist* stack, int ibin)
+{
+  // calculate the normalisation uncertainty of a single bin in the stack
+  // due to normalisation uncertainty on different processes
+  
+  double err = 0;
+  for (int i=0; i<stack->GetStack()->GetStack()->GetEntries(); ++i){
+    TH1* h = (TH1*) stack->GetStack()->GetHists()->At(i);
+    err += h->GetBinContent(ibin)*stack->GetUnc(i);
+  }
+  return err;
 }
 
 void SPlotter::PlotRatios(vector<SHist*> hists, int ipad)
@@ -927,7 +945,8 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
 
     Double_t sys = 0;
     if (m_syserr>0) sys = m_syserr;
-    Double_t tot = TMath::Sqrt(sys*sys + err/val*err/val);
+    Double_t norm_err = CalcNormErrorForBin(sstack, ibin)/val;
+    Double_t tot = TMath::Sqrt(norm_err*norm_err + sys*sys + err/val*err/val);
     MCtot->SetBinContent(ibin, 1.0);
     MCtot->SetBinError(ibin, tot);
   }
