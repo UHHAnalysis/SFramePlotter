@@ -76,7 +76,11 @@ void FileParser::OpenFile(TString fname, TString cyclename)
     }
       
     TString command = "hadd " + target + " " + fname;
-    gSystem->Exec(command);
+    int res = gSystem->Exec(command);
+    if(res != 0){
+        cerr << "hadd command '" << command << "' failed with error code " << res << ", aborting." << endl;
+        exit(EXIT_FAILURE);
+    }
     fname = target;
   }
 
