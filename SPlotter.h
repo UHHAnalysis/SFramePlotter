@@ -72,6 +72,8 @@ class SPlotter
   void SetDrawEntries(Bool_t flag = true){bDrawEntries = flag;}
   void SetPlotRatio(Bool_t flag=true){bPlotRatio = flag;}
   void SetDrawLumi(Bool_t flag=true){bDrawLumi = flag;}
+  void SetForPrelim(Bool_t flag=true){bForPrelim = flag;}
+  void SetForPublication(Bool_t flag=true){bForPublication = flag;}
   void SetLumi(float lumi){m_lumi = lumi;}
   void SetNormError(float err){m_syserr = err;}
   void SetDrawLegend(Bool_t flag=true){bDrawLegend = flag;}
@@ -101,6 +103,8 @@ class SPlotter
   bool  bSingleEPS;         // single eps file for each plot
   bool  bDrawEntries;       // display the number of entries 
   bool  bDrawLumi;          // display the lumi information 
+  bool  bForPrelim;         // write "CMS Preliminary"
+  bool  bForPublication;    // write "CMS"
   float m_lumi;             // total integrated luminosity
   float m_syserr;           // systematic error on normalisation uncertainty
   bool  bDrawLegend;        // display legend?

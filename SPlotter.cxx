@@ -39,6 +39,8 @@ SPlotter::SPlotter()
   bPortrait    = true;
   bDrawEntries = false;
   bDrawLumi    = true;
+  bForPrelim   = false;
+  bForPublication = false;
   bDrawLegend  = true;
   bPlotRatio   = false;
   bSingleEPS   = false;
@@ -1056,12 +1058,14 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
 
 void SPlotter::DrawLumi()
 {
-  TString infotext = TString::Format("CMS Preliminary, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
+  TString infotext = TString::Format("%3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
+  if (bForPrelim) infotext = TString::Format("CMS Preliminary, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
+  if (bForPublication) infotext = TString::Format("CMS, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
   TLatex *text1 = new TLatex(3.5, 24, infotext);
   text1->SetNDC();
   text1->SetTextAlign(13);
   text1->SetX(0.22);
-  text1->SetTextFont(42);
+  text1->SetTextFont(62);
   if (bPlotRatio){ 
     text1->SetTextSize(0.06);
     text1->SetY(0.89);

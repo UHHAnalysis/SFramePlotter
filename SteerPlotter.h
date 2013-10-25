@@ -73,6 +73,12 @@ public:
     void SetDrawLumi(Bool_t flag);
     Bool_t GetDrawLumi();
 
+    void SetForPrelim(Bool_t flag);
+    Bool_t GetForPrelim();
+
+    void SetForPublication(Bool_t flag);
+    Bool_t GetForPublication();
+
     void SetDrawLegend(Bool_t flag);
     Bool_t GetDrawLegend();
 
@@ -96,6 +102,8 @@ private:
     Bool_t    bPortrait;          // portrait or landscape 
     Bool_t    bDrawEntries;       // draw the number of entries?
     Bool_t    bDrawLumi;          // draw the lumi information?
+    Bool_t    bForPrelim;         // write "CMS Preliminary"
+    Bool_t    bForPublication;    // write "CMS"
     Bool_t    bDrawLegend;        // draw the legend everywhere?
     Bool_t    bFitPtBalanceHists; // fit Pt-balance histograms?
     Bool_t    bJetShapesPerSlice; // plot each slide of the jet shape histograms?

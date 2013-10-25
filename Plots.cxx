@@ -100,6 +100,8 @@ int main(int argc, char** argv)
   TArrayF SamplesWeight      = steerfile->GetSamplesWeight();
   TArrayF SamplesUnc         = steerfile->GetSamplesUnc();
   Bool_t DrawLumi            = steerfile->GetDrawLumi();
+  Bool_t ForPrelim           = steerfile->GetForPrelim();
+  Bool_t ForPublication      = steerfile->GetForPublication();
   Float_t Lumi               = steerfile->GetLumi();
   Float_t SysErr             = steerfile->GetSysError();
   Bool_t DrawLegend          = steerfile->GetDrawLegend();
@@ -142,6 +144,8 @@ int main(int argc, char** argv)
   pl.SetLumi(Lumi);
   pl.SetNormError(SysErr);
   pl.SetSingleEPSMode(SingleEPS);
+  pl.SetForPublication(ForPublication);
+  pl.SetForPrelim(ForPrelim);
 
   
   // _______________ do the plotting ______________

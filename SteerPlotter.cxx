@@ -141,6 +141,12 @@ Bool_t SteerPlotter::GetDrawEntries(){return bDrawEntries;}
 void SteerPlotter::SetDrawLumi(Bool_t flag){bDrawLumi = flag;}
 Bool_t SteerPlotter::GetDrawLumi(){return bDrawLumi;}
 
+void SteerPlotter::SetForPrelim(Bool_t flag){bForPrelim = flag;}
+Bool_t SteerPlotter::GetForPrelim(){return bForPrelim;}
+
+void SteerPlotter::SetForPublication(Bool_t flag){bForPublication = flag;}
+Bool_t SteerPlotter::GetForPublication(){return bForPublication;}
+
 void SteerPlotter::SetDrawLegend(Bool_t flag){bDrawLegend = flag;}
 Bool_t SteerPlotter::GetDrawLegend(){return bDrawLegend;}
 
