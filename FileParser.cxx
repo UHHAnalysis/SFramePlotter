@@ -128,6 +128,9 @@ TObjArray* FileParser::FindSubdirs()
 
   m_file->cd();
   TObjArray* dirnames = new TObjArray();
+  TString dirname(""); // empty directory, to stay in home dir first
+  dirnames->Add(new TObjString(dirname));
+
   TKey *key;
   TIter nextkey( gDirectory->GetListOfKeys() );
   while ( (key = (TKey*)nextkey())) {
@@ -180,7 +183,11 @@ void FileParser::BrowseFile()
 	  shist = new SHist(thist);
 	}
 	shist->SetProcessName(m_process);
-	shist->SetDir(dirname);
+	if (dirname==""){
+	  shist->SetDir("Main");
+	} else {
+	  shist->SetDir(dirname);
+	}
 	if (debug) cout << "Adding hist " << shist->GetHist()->GetName() 
 			<< " (process = " << m_process << ")" << endl;
 	m_hists->Add(shist);	
