@@ -920,7 +920,7 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
 	    
 	    if (systFullNamePieces->Contains(sign)){
 	      squarederr += ((hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin)))*((hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin)));
-	       cout << "err" << squarederr << endl;
+	   
 	    }
 	  }	  
 	}	
