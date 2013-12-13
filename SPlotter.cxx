@@ -890,8 +890,8 @@ double SPlotter::CalcNormErrorForBin(SHist* stack, int ibin)
 
 double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TString sign)
 {
+  double squarederr = 0;
   double err = 0;
-
   if (m_shapesys_arr.size()==0)//no systamtics given in theta file
     return err;
     
@@ -919,14 +919,16 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
 	  if (systFullNamePieces->Contains(sampleName)){
 	    
 	    if (systFullNamePieces->Contains(sign)){
-	      err += (hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin));	
+	      squarederr += ((hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin)))*((hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin)));
+	       cout << "err" << squarederr << endl;
 	    }
 	  }	  
 	}	
       }
     }    
   }
-  
+  err = TMath::Sqrt(squarederr);
+  // cout << "err" << squarederr << endl;
   return err;
   
 }
