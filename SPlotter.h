@@ -29,7 +29,7 @@ class SPlotter
   void PlotLumiYield(SHist* hist, int ipad);
 
   // collect all histograms
-  void DoStacking(std::vector<TObjArray*>& hists, TObjArray* StackNames);
+  void DoStacking(std::vector<TObjArray*>& hists, TObjArray* StackNames, bool rename=false);
   TObjArray* GetStacks(std::vector<TObjArray*>& hists, int index=-1);
 
   // utilities
@@ -45,8 +45,9 @@ class SPlotter
   void ShapeNormalise(std::vector<SHist*> hists);
   void DrawLegend(std::vector<SHist*> hists);
   void DrawLumi();
+  void DrawSysError(SHist* stack);
   double CalcNormErrorForBin(SHist* stack, int i);
-  
+  double CalcShapeSysErrorForBinFromTheta(SHist* stack, int i, TString sign);
   // cosmetics
   void DoCosmetics(std::vector<SHist*> hists);
   void GeneralCosmetics(TH1* hist);
@@ -78,11 +79,15 @@ class SPlotter
   void SetNormError(float err){m_syserr = err;}
   void SetDrawLegend(Bool_t flag=true){bDrawLegend = flag;}
   void SetPsFilename(TString name);
+  void SetShapeSysHists(std::vector<TObjArray*> arr){m_shapesys_arr = arr;}
+  void SetLogy(Bool_t flag){bPlotLogy = flag;}
 
  private:
 
   // do the stacking
-  void StackHists(std::vector<TObjArray*>& hists, int index);
+  void StackHists(std::vector<TObjArray*>& hists, int index, bool rename=false);
+
+  std::vector<TObjArray*> m_shapesys_arr;
 
   TCanvas* m_can; 
   TPostScript* m_ps; 
@@ -110,6 +115,7 @@ class SPlotter
   bool  bDrawLegend;        // display legend?
   bool  bPlotRatio;         // should a ratio be plotted?
   bool  need_update;        // should the canvas get an update?
+  bool  bPlotLogy;          // plot all plots with log y scale
   
 
 };

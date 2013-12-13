@@ -24,6 +24,8 @@ SteerPlotter::SteerPlotter()
    fNumOfSamplesToStack = 0;
    fLumi = 0;
    fSysError = -1.;
+   bPlotThetaFile = false;
+   bLogy = false;
 }
 
 SteerPlotter::~SteerPlotter()
@@ -116,6 +118,7 @@ void SteerPlotter::Print(Option_t* opt) const
   cout << (bSingleEPS? "Creating one eps file per histogram." : "Creating one ps file with all histograms for each histogram collection.") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
   cout << (bPortrait?  "Setting the page to portrait mode" : "Setting the page to landscape mode") << endl;
+  cout << (bPlotThetaFile? "Creating plots from one input theta file." : "Using standard SFrame output for plots.") << endl;
   cout << "--------------------------------------------------------------------------------------------------------------------" << endl;
   
 }
@@ -156,8 +159,14 @@ Bool_t SteerPlotter::GetDoCumulative(){return bDoCumulative;}
 void SteerPlotter::SetSingleEPS(Bool_t flag){bSingleEPS = flag;}
 Bool_t SteerPlotter::GetSingleEPS(){return bSingleEPS;}
 
+void SteerPlotter::SetPlotThetaFile(Bool_t flag){bPlotThetaFile = flag;}
+Bool_t SteerPlotter::GetPlotThetaFile(){return bPlotThetaFile;}
+
 void SteerPlotter::SetJetShapesPerSlice(Bool_t flag){bJetShapesPerSlice = flag;}
 Bool_t SteerPlotter::GetJetShapesPerSlice(){return bJetShapesPerSlice;}
+
+void SteerPlotter::SetLogy(Bool_t flag){bLogy = flag;}
+Bool_t SteerPlotter::GetLogy(){return bLogy;}
 
 void SteerPlotter::SetLumi(Float_t lumi){fLumi = lumi;}
 Float_t SteerPlotter::GetLumi(){return fLumi;}

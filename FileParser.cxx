@@ -17,6 +17,7 @@ FileParser::FileParser()
 {
   m_file = NULL;
   m_hists = NULL;
+  m_shapeSys = NULL;
   debug = false;
   m_do_cumulative = true;
 }
@@ -35,6 +36,14 @@ void FileParser::CloseFile()
     delete m_file;
     m_file = NULL;
   }
+}
+
+
+void FileParser::Clear()
+{
+  // clear all arrays, but do not close file
+  if (m_hists) m_hists->Clear();
+  if (m_shapeSys) m_shapeSys->Clear();
 }
 
 bool FileParser::FileExists(TString filename)
@@ -108,6 +117,49 @@ void FileParser::OpenFile(TString fname, TString cyclename)
   return;
 }
 
+
+void FileParser::OpenThetaFile(TString cyclename)
+{
+  // open the root files with names given in the TObjArray
+
+  if (m_file != NULL){
+    cerr << "FileParser::OpenFile: Can not open new file, since file " 
+	 << m_file->GetName() << " is still in memory. Abort." << endl;
+    exit(EXIT_FAILURE);
+  }
+  TString fname = "" ;
+  if (cyclename.Sizeof()!=0){
+    fname = cyclename;
+      }  
+
+  // fname = target;
+
+
+  if (debug) cout << "Opening file with name " << fname << "..." << endl;
+  m_file = new TFile(fname, "READ");
+  if (debug){
+    cout << "... success! pointer = " << m_file << endl;
+    cout << "name = " << m_file << endl;
+    cout << " is open? " << m_file->IsOpen() << endl;
+    m_file->ls();
+  }
+    
+  if (!m_file->IsOpen()) {
+    cout << endl << "FileParser: File " << fname << " does not exist!!!" << endl;
+    exit(EXIT_FAILURE);
+  } else { // success!
+    cout << "FileParser: Successfully opened file " << fname << endl;
+  }
+
+  StoreProcessName(fname);
+
+  // create a new TObjArray to store all histograms
+  m_hists = new TObjArray();
+  m_shapeSys = new TObjArray();
+  return;
+}
+
+
 void FileParser::StoreProcessName(TString name)
 {
   
@@ -120,6 +172,7 @@ void FileParser::StoreProcessName(TString name)
     }
   }
 }
+
 
 TObjArray* FileParser::FindSubdirs()
 {
@@ -198,6 +251,73 @@ void FileParser::BrowseFile()
     }
 
   }
+  
+  return;
+
+}
+
+
+void FileParser::BrowseThetaFile(TString sample)
+{
+
+  if (!m_file){
+    cerr << "FileParser::BrowseFile: No file open. Abort." << endl;
+    exit(EXIT_FAILURE);
+  }
+   
+  m_file->cd();
+  TKey *key;
+  TIter nextkey( m_file->GetListOfKeys() );
+
+  while ( (key = (TKey*)nextkey())) {
+    
+    TString histName = key->GetName();
+    histName.ReplaceAll("__", "#");
+    TObjArray* pieces = histName.Tokenize("#");
+
+    if (((TObjString*)pieces->At(1))->GetString() == sample){
+
+      TObject *obj = key->ReadObj();
+      
+      if ( obj->IsA()->InheritsFrom( TH1::Class() ) ) {
+
+	// histogram found
+	TH1* thist = (TH1*) obj;
+	if (m_do_cumulative) MakeCumulativeHist(thist);
+	//	TH1* rebinned = Rebin(thist, dirname);
+	SHist* shist = NULL;
+	//if (rebinned){
+	// shist = new SHist(rebinned);
+	//}
+	//else {
+	shist = new SHist(thist);
+	//	}
+	TString proc_name = ((TObjString*)pieces->At(1))->GetString();
+	shist->SetProcessName(proc_name);
+	SetProcessName(proc_name);
+	TString hname = ((TObjString*)pieces->At(0))->GetString();
+	shist->SetName(hname);
+	  
+	shist->SetDir("Main");
+	
+	if (pieces->GetEntries()>2){
+	  m_shapeSys->Add(shist);
+	  proc_name = ((TObjString*)pieces->At(1))->GetString() + "__" + ((TObjString*)pieces->At(2))->GetString() + "__" + ((TObjString*)pieces->At(3))->GetString();
+	  shist->SetProcessName(proc_name);	  
+	  SetProcessName(proc_name);
+	  if (debug) cout << "Adding hist to systematic sample: " << shist->GetHist()->GetName() 
+			  << " (process = " << m_process << ")" << endl;
+	} else {
+	  m_hists->Add(shist);
+	  if (debug) cout << "Adding hist " << shist->GetHist()->GetName() 
+			  << " (process = " << m_process << ")" << endl;
+	}
+      }
+      
+      delete obj;
+    }
+  }
+
   
   return;
 

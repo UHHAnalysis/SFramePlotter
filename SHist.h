@@ -3,6 +3,7 @@
 
 #include <TH1.h>
 #include <THStack.h>
+#include <TGraphAsymmErrors.h>
 #include <TH2.h>
 #include <TString.h>
 #include <TObject.h>
@@ -17,6 +18,7 @@ class SHist : public TObject
   ~SHist();
 
   const char* GetName() const;
+  void SetName(TString name);
 
   SHist* Duplicate();
 
@@ -61,9 +63,13 @@ class SHist : public TObject
 
   virtual void Draw(Option_t *option="");
 
+  void SetAsymmErrors(TGraphAsymmErrors* as);
+  TGraphAsymmErrors* GetAsymmErrors();
+
  private:
   TH1* m_hist;
   THStack* m_stack;
+  TGraphAsymmErrors* m_asymme;
   double m_weight;
   TArrayD m_unc_arr;
   TString m_process;

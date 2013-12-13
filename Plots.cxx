@@ -107,31 +107,59 @@ int main(int argc, char** argv)
   Bool_t DrawLegend          = steerfile->GetDrawLegend();
   Bool_t DoCumulative        = steerfile->GetDoCumulative();
   Bool_t SingleEPS           = steerfile->GetSingleEPS();
+  Bool_t ThetaFile           = steerfile->GetPlotThetaFile();
+  Bool_t Logy                = steerfile->GetLogy();
 
   // _______________ loop over files and get all histograms ______________
 
   FileParser fp;
   //fp.SetDebug();
-  fp.SetDoCumulative(DoCumulative);
+  fp.SetDoCumulative(DoCumulative);  
   vector<TObjArray*> harr;
-  for (int i=0; i<InputFilenames->GetEntries(); ++i){
-    TString file = ((TObjString*)InputFilenames->At(i))->GetString();
-    TString legname = ((TObjString*)SampleNames->At(i))->GetString();
-    fp.OpenFile(file, CycleName);
-    fp.BrowseFile();
-    float unc = 0.;
-    if (SamplesUnc.GetSize()!=0) unc = SamplesUnc[i];
-    fp.SetInfo(legname, SamplesWeight[i], HistColors[i], HistMarkers[i], unc);
+  vector<TObjArray*> harr_sys;
+
+  if (!ThetaFile){ // standard case
+    for (int i=0; i<InputFilenames->GetEntries(); ++i){
+      TString file = ((TObjString*)InputFilenames->At(i))->GetString();
+      TString legname = ((TObjString*)SampleNames->At(i))->GetString();
+      fp.OpenFile(file, CycleName);
+      fp.BrowseFile();
+      float unc = 0.;
+      if (SamplesUnc.GetSize()!=0) unc = SamplesUnc[i];
+      fp.SetInfo(legname, SamplesWeight[i], HistColors[i], HistMarkers[i], unc);
+      fp.CloseFile();
+      harr.push_back( fp.GetHists() );
+    }
+
+  } else { // use theta input for plots
+    fp.OpenThetaFile(CycleName);
+    for (int i=0; i<InputFilenames->GetEntries(); ++i){
+      TString sample = ((TObjString*)InputFilenames->At(i))->GetString();
+      TString legname = ((TObjString*)SampleNames->At(i))->GetString();
+      fp.BrowseThetaFile(sample);
+      float unc = 0.;
+      if (SamplesUnc.GetSize()!=0) unc = SamplesUnc[i];
+      fp.SetInfo(legname, SamplesWeight[i], HistColors[i], HistMarkers[i], unc);
+      harr.push_back( new TObjArray(*fp.GetHists()) );
+      if ((fp.GetShapeSys())->GetEntries()>0){
+	harr_sys.push_back( new TObjArray(*fp.GetShapeSys()) );
+      }
+      fp.Clear();
+    }
     fp.CloseFile();
-    harr.push_back( fp.GetHists() );
+    //exit(4);
   }
 
   // _______________ stack histograms ______________
   
   SPlotter pl;
   //pl.SetDebug();
-  pl.DoStacking(harr, SamplesToStack);
-  
+  if (!ThetaFile){
+    pl.DoStacking(harr, SamplesToStack);
+  } else {
+    pl.DoStacking(harr, SamplesToStack, true);
+  }
+
   // ____________ set up the plotter ______________
 
   pl.SetShapeNorm(ShapeNorm);
@@ -146,7 +174,11 @@ int main(int argc, char** argv)
   pl.SetSingleEPSMode(SingleEPS);
   pl.SetForPublication(ForPublication);
   pl.SetForPrelim(ForPrelim);
+  pl.SetLogy(Logy);
 
+  if (ThetaFile){
+    pl.SetShapeSysHists(harr_sys);
+  }
   
   // _______________ do the plotting ______________
   
@@ -159,4 +191,5 @@ int main(int argc, char** argv)
   gSystem->Exit(0);
 
   return 0;
+
 }

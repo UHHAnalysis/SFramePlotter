@@ -94,11 +94,18 @@ public:
     void SetSingleEPS(Bool_t flag);
     Bool_t GetSingleEPS();
 
+    void SetPlotThetaFile(Bool_t flag);
+    Bool_t GetPlotThetaFile();
+
+    void SetLogy(Bool_t flag);
+    Bool_t GetLogy();
+
 private:
 
     Bool_t    bShapeNorm;         // Shape normalization?
     Bool_t    bLumiNorm;          // Lumi normalization?
-    Bool_t    bRatioPlot;         // plot ratios?
+    Bool_t    bRatioPlot;         // plot ratios
+    Bool_t    bLogy;              // plot y-axis on log scale?
     Bool_t    bPortrait;          // portrait or landscape 
     Bool_t    bDrawEntries;       // draw the number of entries?
     Bool_t    bDrawLumi;          // draw the lumi information?
@@ -109,6 +116,7 @@ private:
     Bool_t    bJetShapesPerSlice; // plot each slide of the jet shape histograms?
     Bool_t    bDoCumulative;      // do cumulative distributions instead of normal plots
     Bool_t    bSingleEPS;         // make one EPS file for each histogram
+    Bool_t    bPlotThetaFile;     // take input histograms from theta file
     Int_t     fNumOfSamples;      // how many analysis samples should be plotted
     Float_t   fLumi;              // integrated luminosity of sample
     Float_t   fSysError;          // systematic error on normalisation

@@ -11,9 +11,11 @@
 #include <TLatex.h>
 #include <TEllipse.h>
 #include <TF1.h>
+#include <TGraphAsymmErrors.h>
 #include <TMath.h>
 #include <TColor.h>
 #include "SPlotter.h"
+
 
 using namespace std;
 
@@ -45,6 +47,7 @@ SPlotter::SPlotter()
   bPlotRatio   = false;
   bSingleEPS   = false;
   need_update  = true;
+  bPlotLogy    = false;
 
 }
 
@@ -64,7 +67,7 @@ void SPlotter::SetPsFilename(TString name)
   
 }
 
-void SPlotter::DoStacking(vector<TObjArray*>& hists, TObjArray* StackNames)
+void SPlotter::DoStacking(vector<TObjArray*>& hists, TObjArray* StackNames, bool rename)
 {
   if (hists.size()==0){
     cerr << "SPlotter::DoStacking: Empty array of histograms. Aborting." << endl;
@@ -90,7 +93,7 @@ void SPlotter::DoStacking(vector<TObjArray*>& hists, TObjArray* StackNames)
       if (debug) cout << " stack name = " << sname << endl;
       if (proc.Contains(sname)){
 	if (debug) cout << " -> found match, stacking this array." << endl;
-	StackHists(hists, i);
+	StackHists(hists, i, rename);
 	break;
       }
     }
@@ -102,7 +105,7 @@ void SPlotter::DoStacking(vector<TObjArray*>& hists, TObjArray* StackNames)
 
 }
 
-void SPlotter::StackHists(std::vector<TObjArray*>& hists, int index)
+void SPlotter::StackHists(std::vector<TObjArray*>& hists, int index, bool rename)
 {
   // stack histograms at position 'index' with an existing array of stacks
   // in hists
@@ -133,6 +136,10 @@ void SPlotter::StackHists(std::vector<TObjArray*>& hists, int index)
     // still here? do the stackin'!
     hist->GetHist()->SetFillColor(hist->GetHist()->GetLineColor());
     hist->GetHist()->SetFillStyle(1001);
+    if (rename){
+      TString pname = hist->GetProcessName();
+      hist->SetName(histname + "__" + pname);
+    }
     stack->GetStack()->Add(hist->GetHist());
     hist->SetIsUsedInStack(true);
     hist->SetDoDraw(false);
@@ -165,7 +172,7 @@ TObjArray* SPlotter::GetStacks(std::vector<TObjArray*>& hists, int index)
     }
 
     arr = hists[i];
-    SHist* sh = (SHist*) arr->At(i);
+    SHist* sh = (SHist*) arr->At(0);
     if (sh->IsStack()){
       if (debug) cout << "SPlotter::GetStacks: Found stack at position " << i << endl;
       return arr;
@@ -814,7 +821,7 @@ void SPlotter::PlotHists(vector<SHist*> hists, int ipad)
 
   // draw normalisation error if it is given
   if (sstack){
-    DrawNormError(sstack);
+    DrawSysError(sstack);
   }
 
   // draw data on top
@@ -824,26 +831,45 @@ void SPlotter::PlotHists(vector<SHist*> hists, int ipad)
   
 }
 
-void SPlotter::DrawNormError(SHist* stack)
+void SPlotter::DrawSysError(SHist* stack)
 {
   // plot an error band corresponding to the overall
-  // normalisation error
+  // systematic error
+  // if a theta file is used as input with shape variations, 
+  // also the error from those is drawn
   TH1* h = (TH1*) stack->GetStack()->GetStack()->At( stack->GetStack()->GetStack()->GetEntries()-1 );
-  TH1* e = (TH1*) h->Clone();
-  for (Int_t i=1; i<e->GetNbinsX()+1; ++i){
+  //TH1* e = (TH1*) h->Clone();
+  TGraphAsymmErrors* eAsym = new TGraphAsymmErrors();
+  for (Int_t i=1; i<h->GetNbinsX()+1; ++i){
     Double_t sys = 0; 
-    if (m_syserr>0) sys = m_syserr*e->GetBinContent(i);
-    Double_t stat = e->GetBinError(i);
+    if (m_syserr>0) sys = m_syserr*h->GetBinContent(i);
+    Double_t stat = h->GetBinError(i);
     Double_t norm_err = CalcNormErrorForBin(stack, i);
-    Double_t err = TMath::Sqrt(norm_err*norm_err + sys*sys + stat*stat);
-    e->SetBinError(i, err);
+    Double_t sys_err_plus = CalcShapeSysErrorForBinFromTheta(stack, i, "plus");
+    Double_t sys_err_minus = CalcShapeSysErrorForBinFromTheta(stack, i, "minus");
+   
+    if (sys_err_plus < sys_err_minus){
+      Double_t temp = sys_err_plus;
+      sys_err_plus = sys_err_minus;
+      sys_err_minus = temp;
+    }
+ 
+    Double_t ey_low = TMath::Sqrt(norm_err*norm_err + sys*sys + stat*stat + sys_err_minus*sys_err_minus);
+    Double_t ey_up = TMath::Sqrt(norm_err*norm_err + sys*sys + stat*stat + sys_err_plus*sys_err_plus);
+    Double_t ex_low = (h->GetXaxis()->GetBinCenter(i)) - (h->GetXaxis()->GetBinLowEdge(i));
+    Double_t ex_up =  (h->GetXaxis()->GetBinUpEdge(i))-h->GetXaxis()->GetBinCenter(i);
+    eAsym -> SetPoint(i, h->GetXaxis()->GetBinCenter(i), h->GetBinContent(i)); 
+    eAsym -> SetPointError(i, ex_low, ex_up, ey_low, ey_up); 
+   
   }
+   
   static Int_t LightGray     = TColor::GetColor( "#aaaaaa" );
-  //e->SetFillColor(kGray+2);
-  e->SetFillColor(LightGray);
-  e->SetLineWidth(1);
-  e->SetFillStyle(3245);
-  e->Draw("E2 same");
+  //h->SetFillColor(kGray+2);
+  eAsym->SetFillColor(LightGray);
+  eAsym->SetLineWidth(1);
+  eAsym->SetFillStyle(3245);
+  eAsym->Draw("E2 same");
+
 
 }
 
@@ -858,6 +884,51 @@ double SPlotter::CalcNormErrorForBin(SHist* stack, int ibin)
     err += h->GetBinContent(ibin)*stack->GetUnc(i);
   }
   return err;
+}
+
+
+
+double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TString sign)
+{
+  double err = 0;
+
+  if (m_shapesys_arr.size()==0)//no systamtics given in theta file
+    return err;
+    
+  for (int i=0; i<stack->GetStack()->GetStack()->GetEntries(); ++i){  
+    TH1* h = (TH1*) stack->GetStack()->GetHists()->At(i);
+    TString histname = h->GetName(); //e.g. HT__QCD
+    histname.ReplaceAll("__", "#");
+    TObjArray* histnamePieces = histname.Tokenize("#");
+    TString variableName =  ((TObjString*)histnamePieces->At(0))-> GetString(); //this is the sample name e.g. HT
+    TString sampleName =  ((TObjString*)histnamePieces->At(1))-> GetString(); //this is the sample name e.g. QCD or TTbar
+    
+    for (unsigned int syst = 0; syst < m_shapesys_arr.size(); ++syst){
+      TObjArray* arr = m_shapesys_arr[syst];
+      for (int nplots = 0; nplots < arr->GetEntries(); ++nplots){
+	SHist* hSys = (SHist*)arr->At(nplots);
+	TH1* hSyst = hSys->GetHist();
+	TString systFullName = hSys -> GetProcessName();//e.g. QCD__uncert__plus
+
+	systFullName.ReplaceAll("__","#");
+	TObjArray* systFullNamePieces = systFullName.Tokenize("#");
+	TString systVariableName = hSys -> GetName();
+
+	if (variableName == systVariableName){
+	 
+	  if (systFullNamePieces->Contains(sampleName)){
+	    
+	    if (systFullNamePieces->Contains(sign)){
+	      err += (hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin));	
+	    }
+	  }	  
+	}	
+      }
+    }    
+  }
+  
+  return err;
+  
 }
 
 void SPlotter::PlotRatios(vector<SHist*> hists, int ipad)
@@ -938,6 +1009,7 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
   mctot->GetHist()->SetName("MCtot");
   mctot->SetProcessName("MCtot");
   TH1D* MCtot = (TH1D*)mctot->GetHist();
+  TGraphAsymmErrors* eAsym = new TGraphAsymmErrors();
 
   for (Int_t ibin=1;ibin<denom->GetNbinsX()+1; ++ibin){
     Double_t val = denom->GetBinContent(ibin);
@@ -948,9 +1020,26 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     Double_t sys = 0;
     if (m_syserr>0) sys = m_syserr;
     Double_t norm_err = CalcNormErrorForBin(sstack, ibin)/val;
+
     Double_t tot = TMath::Sqrt(norm_err*norm_err + sys*sys + err/val*err/val);
     MCtot->SetBinContent(ibin, 1.0);
     MCtot->SetBinError(ibin, tot);
+
+    Double_t sys_err_plus = CalcShapeSysErrorForBinFromTheta(sstack, ibin, "plus");
+    Double_t sys_err_minus = CalcShapeSysErrorForBinFromTheta(sstack, ibin, "minus");
+    if (sys_err_plus < sys_err_minus){
+      Double_t temp = sys_err_plus;
+      sys_err_plus = sys_err_minus;
+      sys_err_minus = temp;
+    }
+
+    Double_t ey_low = TMath::Sqrt(norm_err*norm_err + sys*sys + err/val*err/val + sys_err_minus/val*sys_err_minus/val);
+    Double_t ey_up = TMath::Sqrt(norm_err*norm_err + sys*sys +err/val*err/val + sys_err_plus/val*sys_err_plus/val);
+    Double_t ex_low = (denom->GetXaxis()->GetBinCenter(ibin)) - (denom->GetXaxis()->GetBinLowEdge(ibin));
+    Double_t ex_up =  (denom->GetXaxis()->GetBinUpEdge(ibin))-denom->GetXaxis()->GetBinCenter(ibin);
+    eAsym -> SetPoint(ibin, denom->GetXaxis()->GetBinCenter(ibin), 1.); 
+    eAsym -> SetPointError(ibin, ex_low, ex_up, ey_low, ey_up); 
+   
   }
 
   //static Int_t VLightGray    = TColor::GetColor( "#eeeeee" );
@@ -967,6 +1056,15 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
   MCtot->SetMarkerSize(0);
   MCtot->SetLineColor(MLightGray);
   MCtot->SetFillColor(MLightGray);
+
+  eAsym->SetMarkerStyle(0);
+  eAsym->SetMarkerSize(0);
+  eAsym->SetLineColor(MLightGray);
+  eAsym->SetFillColor(MLightGray);
+
+  if (m_shapesys_arr.size()!=0){
+    mctot->SetAsymmErrors(eAsym);
+  }
 
   ratios.push_back(mctot);
   ratios.push_back(mcerr);
@@ -1205,6 +1303,12 @@ void SPlotter::SetLogAxes(vector<SHist*> hists)
   } else {
     // do nothing, all fine
   }
+
+  // override if requested
+  if (bPlotLogy){
+    gPad->SetLogy(1);
+  }
+
   return;
 }
 

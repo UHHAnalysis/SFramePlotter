@@ -17,8 +17,10 @@ class FileParser
   ~FileParser();
 
   void OpenFile(TString fname, TString cyclename);
+  void OpenThetaFile(TString cyclename);
   void CloseFile();
   void BrowseFile();
+  void BrowseThetaFile(TString sample);
   
   bool FileExists(TString name);
 
@@ -27,21 +29,25 @@ class FileParser
   void MakeCumulativeHist(TH1* hist);
 
   TObjArray* GetHists(){return m_hists;}
+  TObjArray* GetShapeSys(){return m_shapeSys;}
   void SetDebug(bool flag=true){debug = flag;}
 
   void SetDoCumulative(bool flag=true){m_do_cumulative = flag;}
 
+  void Clear();
 
  private:
 
   TObjArray* FindSubdirs();
   void StoreProcessName(TString name);
+  void SetProcessName(TString name){m_process = name;}
 
   TFile* m_file;
   TString m_process;
   bool debug;
   bool m_do_cumulative;
   TObjArray* m_hists;
+  TObjArray* m_shapeSys;
   
 
 };

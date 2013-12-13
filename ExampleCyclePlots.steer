@@ -1,26 +1,27 @@
 SteerPlotter(){
   
   // steering for the plotter
-  fCycleName     = "/scratch/hh/dust/naf/cms/user/kogler/Zprime/example/ExampleCycle"; // name of the cycle (first part of the name of the root files)
-  fInputFiles    = "DATA.DATA.root, MC.TTbar.root, MC.Wjets.root,  MC.SingleTop*ch.root, MC.WW.root, MC.ZP1000w10.root, MC.ZP2000w20.root , MC.ZP3000w30.root"; // name of the input files (second part)
-  fSampleNames   = "     Data,          t#bar t,     W + jets,     singleSPACEtop, WW , Z'SPACE1000 ,  Z'SPACE2000 , Z'SPACE3000 "; // name of chains to be plotted
-  fSamplesWeight = "      1.0,          0.88,           0.88,            0.88,  0.88,    10.0 , 10.0 ,10.0"; // weights applied to the samples (same order as in fInputFiles)
-  fHistColors =  "          1,          633,           413,              616 , 400,  1 , 1 ,1";   // the colors of the histograms, negative numbers mean no filling
-  fHistMarkers = "          20,           0,             0,              0 ,  0,  -3 ,-2 , -4";   // histogram markers (0=line, -1=dashed line, 24=open circle...)
+  fCycleName     = "/scratch/hh/dust/naf/cms/user/hoeing/SFrame/Output/cutflow_CA15_regular/cutflowCycle"; // name of the cycle (first part of the name of the root files)
+  fInputFiles    = "DATA.DATA_all.root, MC.TTbar_all.root, MC.QCD_all.root,  MC.TPTHTH1000.root, MC.TPTHTH700.root, MC.TPTHTH500.root"; // name of the input files (second part)
+  fSampleNames   = "     Data,          t#bar t,     QCD, TT#rightarrow tHtH (1000 GeV) x 100, TT#rightarrow tHtH (700 GeV)x 10, TT#rightarrow tHtH (500 GeV)"; // name of chains to be plotted
+  fSamplesWeight = "      1.0,          1.0,           1.0, 100. , 10., 1."; // weights applied to the samples (same order as in fInputFiles)
+  fHistColors =  "          1,          800,           416, 870, 628, 601";   // the colors of the histograms, negative numbers mean no filling
+  fHistMarkers = "          20,           0,             0 , 0, 0, 0";   // histogram markers (0=line, -1=dashed line, 24=open circle...)
 
-  fSamplesToStack = "TTbar,  Wjets, SingleTop"; // the names of chains which you would like to stack (same as in input filenames)
+  fSamplesToStack = "TTbar,  QCD"; // the names of chains which you would like to stack (same as in input filenames)
 
-  fOutputPsFile = "test.ps";
+  fOutputPsFile = "TPrimeHistos.ps";
   
   bRatioPlot = true;   // plot ratio histograms?
   bDrawLumi = false;
   bShapeNorm = false;   // shape normalization? 
   bPortrait = true;    // portrait or landscape?
   bDrawEntries = false; // draw the histogram entries?
-  bFitPtBalanceHists = false; // perform fit of pt-balance histograms?
-  bJetShapesPerSlice = false; // Plot JetShapes also slice per slice in r
   bDrawLegend = true;
   fLumi = 10.7;
+  fSysError = 0.1;
+  bSingleEPS = false;
+  bLogy = true;
   
 }
 

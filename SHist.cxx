@@ -19,6 +19,7 @@ SHist::SHist(TH1* hist)
 
   m_hist = (TH1*) hist->Clone();
   m_stack = NULL;
+  m_asymme = NULL;
   m_weight = 1.;
   m_is_stack = false;
   m_is_used_in_stack = false;
@@ -40,6 +41,7 @@ SHist::SHist(THStack* stack)
 
   m_stack = (THStack*)stack->Clone();
   m_hist = NULL;
+  m_asymme = NULL;
   m_weight = 1.;
   m_is_stack = true;
   m_draw_marker = false;
@@ -58,6 +60,9 @@ SHist::~SHist()
     m_stack->Delete();
     m_stack = NULL;
   }
+  if (m_asymme){
+    delete m_asymme;
+  }
 }
 
 SHist* SHist::Duplicate()
@@ -65,6 +70,10 @@ SHist* SHist::Duplicate()
   SHist* s = NULL;
   if (m_hist) s = new SHist(m_hist);
   if (m_stack) s = new SHist(m_stack);
+  if (m_asymme){
+    TGraphAsymmErrors* t = new TGraphAsymmErrors(*m_asymme);
+    s->SetAsymmErrors(t);
+  }
   s->SetDir(m_dir);
   s->SetProcessName(m_process);
   s->SetLegName(m_leg_name);
@@ -79,6 +88,12 @@ const char* SHist::GetName() const
 {
   if (m_is_stack) return m_stack->GetName();
   else return m_hist->GetName();
+}
+
+void SHist::SetName(TString name)
+{
+  if (m_is_stack) m_stack->SetName(name);
+  else m_hist->SetName(name);
 }
 
 TH1* SHist::GetHist()
@@ -220,10 +235,24 @@ void SHist::Draw(Option_t *option)
 
   if (m_process.Contains("MCstat") || m_process.Contains("MCtot")){
     m_hist->DrawCopy("E2 " + dopt);
+    if (m_asymme){
+      m_asymme->Draw("E2 " + dopt);
+      return;
+    }
     m_hist->SetFillColor(0);
     m_hist->DrawCopy("HIST same");
     return;
   }
+
+   //if (m_asymme){
+    //  m_asymme->Draw("E2 " + dopt);
+    //  return;
+    //} else {
+      //m_hist->DrawCopy("E2 " + dopt);
+      //m_hist->SetFillColor(0);
+      //m_hist->DrawCopy("HIST same");
+      //return;
+      //}
   
   if (IsStack()){
     m_stack->Draw("HIST " + dopt);
@@ -260,6 +289,18 @@ double SHist::GetMaximum()
     return m_hist->GetMaximum();
   }
 
+}
+
+void SHist::SetAsymmErrors(TGraphAsymmErrors* as)
+{
+  // give the SHist an asymmetric error
+  m_asymme = as;  
+}
+
+TGraphAsymmErrors* SHist::GetAsymmErrors()
+{
+  // return the asymmetric errors
+  return m_asymme;
 }
 
 void SHist::NormaliseToArea()
