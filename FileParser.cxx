@@ -343,12 +343,12 @@ TH1* FileParser::Rebin(TH1* hist, TString dirname)
 {						
   TString name(hist->GetName());
   TString title(hist->GetTitle());
-  if (name.CompareTo("pT")==0 && dirname.Contains("Electron") && title.Contains("electron")){
-    //Double_t binsx[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 350, 400, 500};
-    Double_t binsx[] = {30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 350, 400, 500};
+  if (name.CompareTo("HT")==0){// && dirname.Contains("cutflow6") && title.Contains("electron")){
+   
+    Double_t binsx[] = {0, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380, 1440, 1500, 1560, 1620, 1680, 1740, 1800, 1860, 1920, 1980, 2040, 2100, 2400, 3000};
     name.Append("_rebin_lx");
-    TH1* rebinned = hist->Rebin(37, name, binsx);
-    rebinned->SetTitle("electron P_{T} [GeV]");
+    TH1* rebinned = hist->Rebin(22, name, binsx);
+    rebinned->SetTitle("HT [GeV]");
     return rebinned;
   } else {
     return NULL;
