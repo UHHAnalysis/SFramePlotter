@@ -261,7 +261,12 @@ void SHist::Draw(Option_t *option)
     if (m_hist->InheritsFrom("TH2")) return;
 
     if (m_hist->GetMarkerStyle()>0){
-      m_hist->Draw("P " + dopt);
+      //m_hist->Draw("P " + dopt);
+      for (Int_t i=1; i<m_hist->GetNbinsX()+1; ++i){
+	if (m_hist->GetBinContent(i)==0) m_hist->SetBinError(i,0);
+      }
+
+      m_hist->Draw("E0 " + dopt);
     } else {
       m_hist->Draw("HIST " + dopt);
     }

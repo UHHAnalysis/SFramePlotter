@@ -613,6 +613,7 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
 
   // done!
   if (!bSingleEPS) DrawPageNum();
+
   if (need_update) m_can->Update();
   Cleanup(); 
   
@@ -853,13 +854,6 @@ void SPlotter::DrawSysError(SHist* stack)
     Double_t norm_err = CalcNormErrorForBin(stack, i);
     Double_t sys_err_plus = CalcShapeSysErrorForBinFromTheta(stack, i, "plus");
     Double_t sys_err_minus = CalcShapeSysErrorForBinFromTheta(stack, i, "minus");
-   
-    if (sys_err_plus < sys_err_minus){
-      Double_t temp = sys_err_plus;
-      sys_err_plus = sys_err_minus;
-      sys_err_minus = temp;
-    }
- 
     Double_t ey_low = TMath::Sqrt(norm_err*norm_err + sys*sys + stat*stat + sys_err_minus*sys_err_minus);
     Double_t ey_up = TMath::Sqrt(norm_err*norm_err + sys*sys + stat*stat + sys_err_plus*sys_err_plus);
     Double_t ex_low = (h->GetXaxis()->GetBinCenter(i)) - (h->GetXaxis()->GetBinLowEdge(i));
@@ -896,6 +890,7 @@ double SPlotter::CalcNormErrorForBin(SHist* stack, int ibin)
 
 double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TString sign)
 {
+  double absoluteerr = 0;
   double squarederr = 0;
   double err = 0;
   if (m_shapesys_arr.size()==0)//no systamtics given in theta file
@@ -923,9 +918,10 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
 	if (variableName == systVariableName){
 	 
 	  if (systFullNamePieces->Contains(sampleName)){
-	    
-	    if (systFullNamePieces->Contains(sign)){
-	      squarederr += ((hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin)))*((hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin)));
+	    absoluteerr = (hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin));
+
+	    if ((sign == "plus" && absoluteerr >= 0.) ||(sign == "minus" && absoluteerr < 0.) ){
+	      squarederr += absoluteerr*absoluteerr;
 	   
 	    }
 	  }	  
@@ -934,7 +930,6 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
     }    
   }
   err = TMath::Sqrt(squarederr);
-  // cout << "err" << squarederr << endl;
   return err;
   
 }
@@ -1001,7 +996,7 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     Double_t rel_err = err / val;
     rdhist->SetBinError(ibin, rel_err * rdhist->GetBinContent(ibin) );
   }
-  rdhist->GetYaxis()->SetTitle(rd->GetProcessName() + " / MC");
+  rdhist->GetYaxis()->SetTitle(rd->GetProcessName() + " / BG");
   if (bSingleEPS){
     SingleEPSRatioCosmetics(rdhist);
   } else {
@@ -1349,15 +1344,15 @@ void SPlotter::DrawLumi()
   if (bForPublication) infotext = TString::Format("CMS, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
   TLatex *text1 = new TLatex(3.5, 24, infotext);
   text1->SetNDC();
-  text1->SetTextAlign(13);
-  text1->SetX(0.22);
+  text1->SetTextAlign(33);
+  text1->SetX(0.9);
   text1->SetTextFont(62);
   if (bPlotRatio){ 
     text1->SetTextSize(0.06);
-    text1->SetY(0.89);
+    text1->SetY(1.);
   } else {
     text1->SetTextSize(0.045);
-    text1->SetY(0.92);
+    text1->SetY(1.);
   }
   text1->Draw();
   
@@ -1436,7 +1431,7 @@ bool SPlotter::SetMinMax(vector<SHist*> hists)
 
   bool islog = false;
   double uscale = 1.2;
-  if (name.Contains("_lxy") || name.Contains("_ly")){
+  if (name.Contains("_lxy") || name.Contains("_ly") || bPlotLogy ){
     islog = true;
     uscale = 12.;
   }
@@ -1445,7 +1440,7 @@ bool SPlotter::SetMinMax(vector<SHist*> hists)
     SHist* h = hists[i];
     if (h->IsStack()){ 
       if (!islog){
-	h->GetStack()->SetMinimum(0.001);
+	h->GetStack()->SetMinimum(0.0011);
       } else { 
 	if (min>1e-10){
 	  if (min<0.1){
@@ -1458,7 +1453,7 @@ bool SPlotter::SetMinMax(vector<SHist*> hists)
       h->GetStack()->SetMaximum(uscale*max);
     } else {
       if (!islog){ 
-	h->GetHist()->SetMinimum(0.001);
+	h->GetHist()->SetMinimum(0.0011);
       } else { 
 	if (min>1e-10){
 	  if (min<0.1){
@@ -1716,8 +1711,8 @@ void SPlotter::SingleEPSCosmetics(TH1* hist)
 void SPlotter::SingleEPSRatioCosmetics(TH1* hist)
 {
 
-  //hist->GetYaxis()->SetRangeUser(0.3, 1.7);
-  hist->GetYaxis()->SetRangeUser(0.05, 1.95);
+  hist->GetYaxis()->SetRangeUser(0.3, 1.7);
+  //hist->GetYaxis()->SetRangeUser(0.05, 1.95);
   hist->SetMarkerSize(0.7);
 
   // cosmetics for portrait mode 
@@ -1805,8 +1800,8 @@ void SPlotter::LandscapeCosmetics(TH1* hist)
 void SPlotter::RatioCosmetics(TH1* hist)
 {
 
-  //hist->GetYaxis()->SetRangeUser(0.3, 1.7);
-  hist->GetYaxis()->SetRangeUser(0.05, 1.95);
+  hist->GetYaxis()->SetRangeUser(0.3, 1.7);
+  //hist->GetYaxis()->SetRangeUser(0.05, 1.95);
   hist->SetMarkerSize(0.7);
 
   // cosmetics for portrait mode 
