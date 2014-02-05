@@ -14,6 +14,7 @@ SteerPlotter(){
   fOutputPsFile = "/scratch/hh/dust/naf/cms/user/kogler/Zprime/Plots/Example.ps";
   
   bRatioPlot = true;   // plot ratio histograms?
+  bZScoreInRatio = true;   // plot z-score instead of usual ratio
   bDrawLegend = false;   // draw a legend on each histogram? (otherwise only on the first one in each ps file)
   bShapeNorm = false;   // shape normalization? 
   bPortrait = true;    // portrait or landscape?

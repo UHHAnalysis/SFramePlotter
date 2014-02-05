@@ -61,6 +61,9 @@ class SHist : public TObject
 
   void NormaliseToArea();
 
+  void DrawNoErrorX(bool);
+  bool GetNoErrorX();
+
   virtual void Draw(Option_t *option="");
 
   void SetAsymmErrors(TGraphAsymmErrors* as);
@@ -80,6 +83,7 @@ class SHist : public TObject
   bool m_draw_marker;
   bool m_draw;
   bool m_is_yield_plot;
+  bool m_draw_noxerr;
 
   ClassDef(SHist,0)  // SFrame histograms
 

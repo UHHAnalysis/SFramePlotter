@@ -1161,6 +1161,7 @@ vector<SHist*> SPlotter::CalcZScore(vector<SHist*> hists)
   SHist* zscore = sdata->Duplicate();
   TH1D* zscorehist = (TH1D*)zscore->GetHist();
   zscorehist->GetYaxis()->SetTitle("Z-Score");
+  zscore->DrawNoErrorX(true);
   ZScoreCosmetics(zscorehist);
 
   // to guide the eye
@@ -1224,7 +1225,7 @@ vector<SHist*> SPlotter::CalcZScore(vector<SHist*> hists)
     //f->Close();
 
     zscorehist->SetBinContent(ibin, vzscore);
-    zscorehist->SetBinError(ibin, 0);
+    zscorehist->SetBinError(ibin, 1e-5);
 
     // just to guide the eye: 1sigma and 2sigma bands
     MCstat->SetBinContent(ibin,  0.0);

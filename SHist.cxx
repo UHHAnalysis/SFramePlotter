@@ -227,6 +227,17 @@ bool SHist::DoDraw()
   return m_draw;
 }
 
+void SHist::DrawNoErrorX(bool flag)
+{
+  m_draw_noxerr = flag;
+}
+
+bool SHist::GetNoErrorX()
+{
+  return m_draw_noxerr;
+}
+
+
 void SHist::Draw(Option_t *option)
 {
   // here is all the fun: Draw the histogram
@@ -261,12 +272,12 @@ void SHist::Draw(Option_t *option)
     if (m_hist->InheritsFrom("TH2")) return;
 
     if (m_hist->GetMarkerStyle()>0){
-      //m_hist->Draw("P " + dopt);
+
       for (Int_t i=1; i<m_hist->GetNbinsX()+1; ++i){
 	if (m_hist->GetBinContent(i)==0) m_hist->SetBinError(i,0);
       }
-
-      m_hist->Draw("E0 " + dopt);
+      if (m_draw_noxerr) m_hist->Draw("E0 X0 " + dopt);
+      else m_hist->Draw("E0 " + dopt);
     } else {
       m_hist->Draw("HIST " + dopt);
     }
