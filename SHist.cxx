@@ -26,6 +26,7 @@ SHist::SHist(TH1* hist)
   m_draw_marker = true;
   m_draw = true;
   m_is_yield_plot = false;
+  m_draw_noxerr = true; 
   
 }
 
@@ -47,6 +48,7 @@ SHist::SHist(THStack* stack)
   m_draw_marker = false;
   m_draw = true;
   m_is_yield_plot = false;
+  m_draw_noxerr = true;
   
 }
 
@@ -273,11 +275,14 @@ void SHist::Draw(Option_t *option)
 
     if (m_hist->GetMarkerStyle()>0){
 
-      for (Int_t i=1; i<m_hist->GetNbinsX()+1; ++i){
-	if (m_hist->GetBinContent(i)==0) m_hist->SetBinError(i,0);
+      if (m_draw_noxerr){
+	m_hist->Draw("P " + dopt);
+      } else {
+	for (Int_t i=1; i<m_hist->GetNbinsX()+1; ++i){
+	  if (m_hist->GetBinContent(i)==0) m_hist->SetBinError(i,0);
+	}
+	m_hist->Draw("E0 " + dopt);
       }
-      if (m_draw_noxerr) m_hist->Draw("E0 X0 " + dopt);
-      else m_hist->Draw("E0 " + dopt);
     } else {
       m_hist->Draw("HIST " + dopt);
     }

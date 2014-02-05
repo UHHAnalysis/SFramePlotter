@@ -1224,8 +1224,12 @@ vector<SHist*> SPlotter::CalcZScore(vector<SHist*> hists)
     //f->Write();
     //f->Close();
 
+    if (vobs<1){
+      vzscore = -999;
+    }
+
     zscorehist->SetBinContent(ibin, vzscore);
-    zscorehist->SetBinError(ibin, 1e-5);
+    zscorehist->SetBinError(ibin, 0);
 
     // just to guide the eye: 1sigma and 2sigma bands
     MCstat->SetBinContent(ibin,  0.0);
@@ -1303,7 +1307,7 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
     int lstyle = sh->GetHist()->GetLineStyle();
 
     if (marker>0){
-      entry = leg->AddEntry(legname, legtitle, "lp");
+      entry = leg->AddEntry(legname, legtitle, "lpe");
       entry->SetLineWidth(1);
       entry->SetLineColor(sh->GetHist()->GetLineColor());
       entry->SetMarkerColor(sh->GetHist()->GetLineColor());
