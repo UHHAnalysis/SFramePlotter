@@ -25,6 +25,9 @@ public:
     void SetRatioPlot(Bool_t flag);
     Bool_t GetRatioPlot();
 
+    void SetZScoreInRatio(Bool_t flag);
+    Bool_t GetZScoreInRatio();
+
     void SetPortrait(Bool_t flag);
     Bool_t GetPortrait();
 
@@ -105,6 +108,7 @@ private:
     Bool_t    bShapeNorm;         // Shape normalization?
     Bool_t    bLumiNorm;          // Lumi normalization?
     Bool_t    bRatioPlot;         // plot ratios
+    Bool_t    bZScoreInRatio;     // plot z-score instead of usual ratio
     Bool_t    bLogy;              // plot y-axis on log scale?
     Bool_t    bPortrait;          // portrait or landscape 
     Bool_t    bDrawEntries;       // draw the number of entries?

@@ -26,6 +26,7 @@ class SPlotter
   void PlotHists(std::vector<SHist*> hists, int ipad);
   void DrawNormError(SHist* stack);
   void PlotRatios(std::vector<SHist*> hists, int ipad);
+  void PlotZScore(std::vector<SHist*> hists, int ipad);
   void PlotLumiYield(SHist* hist, int ipad);
 
   // collect all histograms
@@ -42,6 +43,7 @@ class SPlotter
   int GetCurrentPad(int);
   void DrawPageNum();
   std::vector<SHist*> CalcRatios(std::vector<SHist*> hists);
+  std::vector<SHist*> CalcZScore(std::vector<SHist*> hists);
   void ShapeNormalise(std::vector<SHist*> hists);
   void DrawLegend(std::vector<SHist*> hists);
   void DrawLumi();
@@ -57,6 +59,7 @@ class SPlotter
   void RatioCosmetics(TH1* hist);
   void SingleEPSCosmetics(TH1* hist);
   void SingleEPSRatioCosmetics(TH1* hist);
+  void ZScoreCosmetics(TH1* hist);
   void CopyStyle(TH1& h1, TH1* h2);
   bool SetMinMax(std::vector<SHist*> hists);
   void SetLogAxes(std::vector<SHist*> hists);
@@ -72,6 +75,7 @@ class SPlotter
   void SetSingleEPSMode(Bool_t flag = true){bSingleEPS = flag;}
   void SetDrawEntries(Bool_t flag = true){bDrawEntries = flag;}
   void SetPlotRatio(Bool_t flag=true){bPlotRatio = flag;}
+  void SetZScoreInRatio(Bool_t flag=true){bZScoreInRatio = flag;}
   void SetDrawLumi(Bool_t flag=true){bDrawLumi = flag;}
   void SetForPrelim(Bool_t flag=true){bForPrelim = flag;}
   void SetForPublication(Bool_t flag=true){bForPublication = flag;}
@@ -114,6 +118,7 @@ class SPlotter
   float m_syserr;           // systematic error on normalisation uncertainty
   bool  bDrawLegend;        // display legend?
   bool  bPlotRatio;         // should a ratio be plotted?
+  bool  bZScoreInRatio;     // plot the z-score instead of the usual ratio
   bool  need_update;        // should the canvas get an update?
   bool  bPlotLogy;          // plot all plots with log y scale
   

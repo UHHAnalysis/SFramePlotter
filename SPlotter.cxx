@@ -4,7 +4,9 @@
 #include <TObjArray.h>
 #include <TObjString.h>
 #include <TStyle.h>
+#include <TFile.h>
 #include <TROOT.h>
+#include <TRandom3.h>
 #include <TPaveText.h>
 #include <TLegend.h>
 #include <TLegendEntry.h>
@@ -45,6 +47,7 @@ SPlotter::SPlotter()
   bForPublication = false;
   bDrawLegend  = true;
   bPlotRatio   = false;
+  bZScoreInRatio = false;
   bSingleEPS   = false;
   need_update  = true;
   bPlotLogy    = false;
@@ -598,7 +601,10 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
       // draw lumi information
       if (bDrawLumi) DrawLumi();
       // draw the ratio
-      if (bPlotRatio) PlotRatios(hists, ipad);
+      if (bPlotRatio){
+	if (bZScoreInRatio) PlotZScore(hists, ipad);
+	else PlotRatios(hists, ipad);
+      }
     
     }
 
@@ -606,7 +612,7 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
   }
 
   // done!
-  DrawPageNum();
+  if (!bSingleEPS) DrawPageNum();
   if (need_update) m_can->Update();
   Cleanup(); 
   
@@ -961,6 +967,7 @@ void SPlotter::PlotRatios(vector<SHist*> hists, int ipad)
   
 }
 
+
 vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
 {
   // build ratios from the array 'hists'
@@ -1075,6 +1082,185 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
   return ratios;
 
 }
+
+void SPlotter::PlotZScore(vector<SHist*> hists, int ipad)
+{
+  // plot all histograms in the array
+
+  if (ipad==1) m_rp1->cd();
+  if (ipad==2) m_rp2->cd();
+
+  // calculate ratios
+  vector<SHist*> ratios = CalcZScore(hists);
+
+  gPad->SetLogx(0);
+  gPad->SetLogy(0);
+
+  int ndrawn = 0;
+  int nh = ratios.size();
+  for (int i=0; i<nh; ++i){
+    SHist* rh = ratios[i];
+    TString name = rh->GetName();
+    if (name.Contains("_lx")) gPad->SetLogx(1);
+    if (ndrawn==0) rh->Draw();      
+    else rh->Draw("same");
+    
+    ++ndrawn;
+  }
+
+  // some lines to guide the eye
+  TH1* h = ratios[0]->GetHist();
+  double xmin = h->GetXaxis()->GetXmin();
+  double xmax = h->GetXaxis()->GetXmax();
+  TLine* zerol = new TLine(xmin, 0, xmax, 0);
+  TLine* upl = new TLine(xmin, 3, xmax, 3);
+  TLine* downl = new TLine(xmin, -3, xmax, -3);
+
+  zerol->SetLineColor(kBlack);
+  upl->SetLineColor(kGray+1);
+  downl->SetLineColor(kGray+1);
+
+  upl->SetLineStyle(kDotted);
+  downl->SetLineStyle(kDotted);
+  
+  zerol->Draw();
+  upl->Draw();
+  downl->Draw();
+ 
+  gPad->RedrawAxis();
+  
+}
+
+vector<SHist*> SPlotter::CalcZScore(vector<SHist*> hists)
+{
+  // build ratios from the array 'hists'
+  // by default it is checked if a data histogram exists,
+  // which is then divided by the stack
+  // steerable: which histograms should be calculated for the ratio
+
+  // first get the basic histograms
+  SHist* sstack = SelStack(hists);
+  SHist* sdata  = SelData(hists);
+  
+  vector<SHist*> scores;
+
+  // TODO: score if neither stack nor data exist
+  if (!sstack || !sdata){    
+    return scores;
+  }
+  
+  // observed
+  TH1D*  obshist = (TH1D*) sdata->GetHist();
+
+  // expected
+  TObjArray* arr = sstack->GetStack()->GetStack();
+  TH1D* exphist = (TH1D*) arr->At(arr->GetEntries()-1);
+
+  // error on expected
+  SHist experr(exphist);
+  experr.GetHist()->SetName("ExpErr");
+  experr.SetProcessName("ExpErr");
+  TH1D* experrhist = (TH1D*)experr.GetHist();
+
+  // the result
+  SHist* zscore = sdata->Duplicate();
+  TH1D* zscorehist = (TH1D*)zscore->GetHist();
+  zscorehist->GetYaxis()->SetTitle("Z-Score");
+  ZScoreCosmetics(zscorehist);
+
+  // to guide the eye
+  SHist* mcerr = zscore->Duplicate();
+  mcerr->GetHist()->SetName("MCstat");
+  mcerr->SetProcessName("MCstat");
+  TH1D* MCstat = (TH1D*)mcerr->GetHist();
+
+  SHist* mctot = zscore->Duplicate();
+  mctot->GetHist()->SetName("MCtot");
+  mctot->SetProcessName("MCtot");
+  TH1D* MCtot = (TH1D*)mctot->GetHist();
+
+  for (Int_t ibin=1;ibin<exphist->GetNbinsX()+1; ++ibin){
+    Double_t val = exphist->GetBinContent(ibin);
+    Double_t staterr = exphist->GetBinError(ibin);
+
+    Double_t sys = 0;
+    if (m_syserr>0) sys = m_syserr*val; // take absolute error
+    Double_t norm_err = CalcNormErrorForBin(sstack, ibin);
+
+    Double_t tot_err2 = norm_err*norm_err + sys*sys + staterr*staterr;
+
+    Double_t sys_err_plus = CalcShapeSysErrorForBinFromTheta(sstack, ibin, "plus");
+    Double_t sys_err_minus = CalcShapeSysErrorForBinFromTheta(sstack, ibin, "minus");
+    // symmetrize
+    double sys_err_tot = ( fabs(sys_err_plus) + fabs(sys_err_minus) ) / 2.;
+
+    tot_err2 += sys_err_tot*sys_err_tot;
+    
+    experrhist->SetBinError(ibin, TMath::Sqrt(tot_err2));   
+  }
+
+  // calculate Z-score for each bin
+  int ntoys = 20000;
+  for (Int_t ibin = 1; ibin<exphist->GetNbinsX()+1; ++ibin){
+    Double_t vobs = obshist->GetBinContent(ibin);
+    Double_t vexp = exphist->GetBinContent(ibin);
+    Double_t verr_exp = experrhist->GetBinError(ibin);
+    Int_t nbins = max(int(vexp)*3,50);
+    TH1D expdist("expdist","expdist", nbins, -0.5, nbins-0.5); // creates a histogram for the Z-score computation, based on the Expected no of events.
+    TRandom3 rand(0);
+    for (int i=0; i<ntoys; ++i){
+      double x = rand.Gaus(vexp, verr_exp);
+      if (x<0) continue;
+      expdist.Fill(rand.Poisson(x), TMath::Gaus(x,vexp,verr_exp,true)); // fill a histogram with a poisson dist. weighted with gaussian shape
+    }
+    expdist.Scale(1./expdist.Integral());
+
+    double integXtoInf = expdist.Integral(expdist.FindFixBin(vobs)+1,expdist.GetNbinsX());
+    integXtoInf += expdist.GetBinContent(expdist.FindFixBin(vobs))*0.5; // add half of the bin content because of binning 
+    double pvalue = 1-integXtoInf;
+    double vzscore = TMath::NormQuantile(pvalue);
+    //double zscore = (vobs-vexp)/verr_exp; // naive definition, would also work (and we would not need to dice)   
+
+    // save the histograms for debugging
+    //TString fname = TString::Format("temp_%i.root", ibin);
+    //TFile* f = new TFile(fname, "RECREATE");
+    //expdist.Write();
+    //f->Write();
+    //f->Close();
+
+    zscorehist->SetBinContent(ibin, vzscore);
+    zscorehist->SetBinError(ibin, 0);
+
+    // just to guide the eye: 1sigma and 2sigma bands
+    MCstat->SetBinContent(ibin,  0.0);
+    MCstat->SetBinError(ibin,  1.0);
+
+    MCtot->SetBinContent(ibin, 0.0);
+    MCtot->SetBinError(ibin, 2.0);
+
+
+  }
+
+  static Int_t MLightGray    = TColor::GetColor( "#dddddd" );
+  static Int_t LightGray     = TColor::GetColor( "#aaaaaa" );
+
+  MCstat->SetMarkerStyle(0);
+  MCstat->SetMarkerSize(0);
+  MCstat->SetLineColor(LightGray);
+  MCstat->SetFillColor(LightGray);
+
+  MCtot->SetMarkerStyle(0);
+  MCtot->SetMarkerSize(0);
+  MCtot->SetLineColor(MLightGray);
+  MCtot->SetFillColor(MLightGray);
+
+  scores.push_back(mctot);
+  scores.push_back(mcerr);
+  scores.push_back(zscore);
+ 
+  return scores;
+}
+
 
 void SPlotter::DrawLegend(vector<SHist*> hists)
 {
@@ -1663,6 +1849,22 @@ void SPlotter::RatioCosmetics(TH1* hist)
     hist->GetYaxis()->SetTickLength(0.03);
     
   }
+
+}
+
+void SPlotter::ZScoreCosmetics(TH1* hist)
+{
+
+  // use the usual ratio cosmetics first
+  if (bSingleEPS){
+    SingleEPSRatioCosmetics(hist);
+  } else {
+    RatioCosmetics(hist);
+  }
+
+  hist->GetYaxis()->SetRangeUser(-4.5, 4.5);
+
+  return;
 
 }
 

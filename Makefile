@@ -38,7 +38,6 @@ TMPDIR       = $(DIR)/tmp
 ROOTLIBS     = $(shell $(ROOTSYS)/bin/root-config --libs)
 
 OBJS         = $(TMPDIR)/Plots.o
-#OBJS         += $(TMPDIR)/RootPlotter.o
 OBJS         += $(TMPDIR)/SteerPlotter.o
 OBJS         += $(TMPDIR)/SteerParser.o
 OBJS         += $(TMPDIR)/BaseSteer.o
@@ -62,8 +61,10 @@ setup:
 	mkdir -p $(TMPDIR)
 
 clean:
-	rm *Dict.cxx *Dict.h
-	rm -rf $(OBJS) $(BINDIR) $(TMPDIR)
+	@rm -f *Dict.cxx *Dict.h
+	@rm -rf $(OBJS) $(BINDIR) $(TMPDIR)
+
+distclean: clean
 
 $(TMPDIR)/%.o: %.cxx
 	$(CXX) -c $(CXXFLAGS) -I$(TMPDIR) \

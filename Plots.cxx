@@ -88,6 +88,7 @@ int main(int argc, char** argv)
   TString PsFilename         = steerfile->GetOutputPsFile();
   Bool_t ShapeNorm           = steerfile->GetShapeNorm();
   Bool_t RatioPlot           = steerfile->GetRatioPlot();
+  Bool_t zscore              = steerfile->GetZScoreInRatio();
   Bool_t PortraitMode        = steerfile->GetPortrait();
   Bool_t DrawEntries         = steerfile->GetDrawEntries();
   //Bool_t PtBalanceFitOpt     = steerfile->GetFitPtBalanceHists();
@@ -166,6 +167,7 @@ int main(int argc, char** argv)
   pl.SetPortraitMode(PortraitMode);
   pl.SetDrawEntries(DrawEntries);
   pl.SetPlotRatio(RatioPlot);
+  pl.SetZScoreInRatio(zscore);
   pl.SetDrawLumi(DrawLumi); 
   pl.SetDrawLegend(DrawLegend);
   pl.SetPsFilename(PsFilename);

@@ -26,6 +26,7 @@ SteerPlotter::SteerPlotter()
    fSysError = -1.;
    bPlotThetaFile = false;
    bLogy = false;
+   bZScoreInRatio = false;
 }
 
 SteerPlotter::~SteerPlotter()
@@ -104,6 +105,9 @@ void SteerPlotter::Print(Option_t* opt) const
     cout << "No background substraction" << endl;
   }
   cout << (bRatioPlot? "Ratios will be plotted." : "No ratios will be plotted") << endl;
+  if (bRatioPlot){
+    cout << (bZScoreInRatio? "Z-Score will be plotted in bottom pad." : "Usual data/MC ratios will be plotted in bottom pad.") << endl;
+  }
   cout << (bDrawEntries? "Number of histogram entries will be plotted." : "Number of histogram entries will not be plotted") << endl;
   cout << (bDrawLumi? "Lumi inforamtion will be plotted." : "Lumi inforamtion will not be plotted") << endl;
   cout << "Integrated luminosity = " << fLumi << " fb-1" << endl;
@@ -131,6 +135,9 @@ Bool_t SteerPlotter::GetLumiNorm(){return bLumiNorm;}
 
 void SteerPlotter::SetRatioPlot(Bool_t flag){bRatioPlot = flag;}
 Bool_t SteerPlotter::GetRatioPlot(){return bRatioPlot;}
+
+void SteerPlotter::SetZScoreInRatio(Bool_t flag){bZScoreInRatio = flag;}
+Bool_t SteerPlotter::GetZScoreInRatio(){return bZScoreInRatio;}
 
 void SteerPlotter::SetPortrait(Bool_t flag){bPortrait = flag;}
 Bool_t SteerPlotter::GetPortrait(){return bPortrait;}
