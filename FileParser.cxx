@@ -93,6 +93,26 @@ void FileParser::OpenFile(TString fname, TString cyclename)
     fname = target;
   }
 
+  // check if name consists of a wildcard, if so use hadd to combine histograms
+  if (fname.Contains("?")){
+    TString target(fname);
+    target.ReplaceAll("?","");
+
+    // check if target exists, delete if yes
+    if (FileExists(target)){
+      if (debug) cout << "Target exists, removing file " << target << endl;
+      remove(target);
+    }
+      
+    TString command = "hadd " + target + " " + fname;
+    int res = gSystem->Exec(command);
+    if(res != 0){
+        cerr << "hadd command '" << command << "' failed with error code " << res << ", aborting." << endl;
+        exit(EXIT_FAILURE);
+    }
+    fname = target;
+  }
+
   if (debug) cout << "Opening file with name " << fname << "..." << endl;
   m_file = new TFile(fname, "READ");
   if (debug){

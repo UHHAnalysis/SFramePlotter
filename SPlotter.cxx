@@ -1218,11 +1218,11 @@ vector<SHist*> SPlotter::CalcZScore(vector<SHist*> hists)
     //double zscore = (vobs-vexp)/verr_exp; // naive definition, would also work (and we would not need to dice)   
 
     // save the histograms for debugging
-    //TString fname = TString::Format("temp_%i.root", ibin);
-    //TFile* f = new TFile(fname, "RECREATE");
-    //expdist.Write();
-    //f->Write();
-    //f->Close();
+    TString fname = TString::Format("temp_%i.root", ibin);
+    TFile* f = new TFile(fname, "RECREATE");
+    expdist.Write();
+    f->Write();
+    f->Close();
 
     if (vobs<1){
       vzscore = -999;
