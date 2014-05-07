@@ -97,6 +97,9 @@ public:
     void SetSingleEPS(Bool_t flag);
     Bool_t GetSingleEPS();
 
+    void SetIgnoreEmptyBins(Bool_t flag);
+    Bool_t GetIgnoreEmptyBins();
+
     void SetPlotThetaFile(Bool_t flag);
     Bool_t GetPlotThetaFile();
 
@@ -121,6 +124,7 @@ private:
     Bool_t    bDoCumulative;      // do cumulative distributions instead of normal plots
     Bool_t    bSingleEPS;         // make one EPS file for each histogram
     Bool_t    bPlotThetaFile;     // take input histograms from theta file
+    Bool_t    bIgnoreEmptyBins;   // ignore empty bins in the ratio
     Int_t     fNumOfSamples;      // how many analysis samples should be plotted
     Float_t   fLumi;              // integrated luminosity of sample
     Float_t   fSysError;          // systematic error on normalisation

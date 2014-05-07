@@ -20,6 +20,7 @@ SteerPlotter::SteerPlotter()
    bDrawLumi = false;
    bDrawLegend = true;
    bSingleEPS = false;
+   bIgnoreEmptyBins = false;
    bDoCumulative = false;
    fNumOfSamplesToStack = 0;
    fLumi = 0;
@@ -120,6 +121,7 @@ void SteerPlotter::Print(Option_t* opt) const
   cout << (bShapeNorm? "Shape normalization" : "No shape normalization") << endl;
   cout << (bDoCumulative? "Cumulative distributions will be plotted." : "Normal distributions will be plotted") << endl;
   cout << (bSingleEPS? "Creating one eps file per histogram." : "Creating one ps file with all histograms for each histogram collection.") << endl;
+  cout << (bIgnoreEmptyBins? "Empty bins will not be plotted in the ratio." : "Empty bins will have infinite error in the ratio.") << endl;
   cout << (bLumiNorm? "Luminosity normalization" : "No lumi normalization") << endl;
   cout << (bPortrait?  "Setting the page to portrait mode" : "Setting the page to landscape mode") << endl;
   cout << (bPlotThetaFile? "Creating plots from one input theta file." : "Using standard SFrame output for plots.") << endl;
@@ -165,6 +167,9 @@ Bool_t SteerPlotter::GetDoCumulative(){return bDoCumulative;}
 
 void SteerPlotter::SetSingleEPS(Bool_t flag){bSingleEPS = flag;}
 Bool_t SteerPlotter::GetSingleEPS(){return bSingleEPS;}
+
+void SteerPlotter::SetIgnoreEmptyBins(Bool_t flag){bIgnoreEmptyBins = flag;}
+Bool_t SteerPlotter::GetIgnoreEmptyBins(){return bIgnoreEmptyBins;}
 
 void SteerPlotter::SetPlotThetaFile(Bool_t flag){bPlotThetaFile = flag;}
 Bool_t SteerPlotter::GetPlotThetaFile(){return bPlotThetaFile;}

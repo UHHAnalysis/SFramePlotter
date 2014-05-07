@@ -17,13 +17,12 @@ SteerPlotter(){
   bShapeNorm = false;   // shape normalization? 
   bPortrait = true;    // portrait or landscape?
   bDrawEntries = false; // draw the histogram entries?
-  bFitPtBalanceHists = false; // perform fit of pt-balance histograms?
-  bJetShapesPerSlice = false; // Plot JetShapes also slice per slice in r
   bDrawLegend = true;
   fLumi = 19.7;
   bSingleEPS = false;
   bPlotThetaFile = true;
   bLogy = false;
+  bIgnoreEmtpyBins = true; // don't plot a huge error in the ratio if bins are empty
   
 }
 

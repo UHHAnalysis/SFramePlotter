@@ -51,6 +51,7 @@ SPlotter::SPlotter()
   bSingleEPS   = false;
   need_update  = true;
   bPlotLogy    = false;
+  bIgnoreEmptyBins = false;
 
 }
 
@@ -1019,7 +1020,7 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     Double_t val = denom->GetBinContent(ibin);
     Double_t err = denom->GetBinError(ibin);
     MCstat->SetBinContent(ibin,  1.0);
-    MCstat->SetBinError(ibin,  err/val);
+    MCstat->SetBinError(ibin,  err/val);    
 
     Double_t sys = 0;
     if (m_syserr>0) sys = m_syserr;
@@ -1043,6 +1044,14 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     Double_t ex_up =  (denom->GetXaxis()->GetBinUpEdge(ibin))-denom->GetXaxis()->GetBinCenter(ibin);
     eAsym -> SetPoint(ibin, denom->GetXaxis()->GetBinCenter(ibin), 1.); 
     eAsym -> SetPointError(ibin, ex_low, ex_up, ey_low, ey_up); 
+
+    // set error to 0 for empty bins
+    if (bIgnoreEmptyBins && val==0){
+      cout << "no MC in bin " << ibin << " lower = " << denom->GetXaxis()->GetBinLowEdge(ibin) << " upper = " << denom->GetXaxis()->GetBinUpEdge(ibin) << endl;
+      MCstat->SetBinError(ibin, 0.);
+      MCtot->SetBinError(ibin, 0.);
+      eAsym -> SetPointError(ibin, ex_low, ex_up, 0, 0); 
+    }
    
   }
 
@@ -1054,6 +1063,10 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
   MCstat->SetMarkerStyle(0);
   MCstat->SetMarkerSize(0);
   MCstat->SetLineColor(LightGray);
+  if (bIgnoreEmptyBins){
+    MCstat->SetLineColor(kBlack);
+    MCstat->SetLineStyle(kDashed);
+  }
   MCstat->SetFillColor(LightGray);
 
   MCtot->SetMarkerStyle(0);

@@ -110,6 +110,7 @@ int main(int argc, char** argv)
   Bool_t SingleEPS           = steerfile->GetSingleEPS();
   Bool_t ThetaFile           = steerfile->GetPlotThetaFile();
   Bool_t Logy                = steerfile->GetLogy();
+  Bool_t IgnoreEmptyBins     = steerfile->GetIgnoreEmptyBins();
 
   // _______________ loop over files and get all histograms ______________
 
@@ -177,6 +178,7 @@ int main(int argc, char** argv)
   pl.SetForPublication(ForPublication);
   pl.SetForPrelim(ForPrelim);
   pl.SetLogy(Logy);
+  pl.SetIgnoreEmptyBins(IgnoreEmptyBins);
 
   if (ThetaFile){
     pl.SetShapeSysHists(harr_sys);
