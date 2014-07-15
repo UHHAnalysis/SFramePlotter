@@ -1072,8 +1072,7 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     eAsym -> SetPointError(ibin, ex_low, ex_up, ey_low, ey_up); 
 
     // set error to 0 for empty bins
-    //cout << "bIgnore = " << bIgnoreEmptyBins << " val = " << val << endl;
-    if (bIgnoreEmptyBins && val<0.01){
+    if (bIgnoreEmptyBins && val<0.1){
       //cout << "no MC in bin " << ibin << " lower = " << denom->GetXaxis()->GetBinLowEdge(ibin) << " upper = " << denom->GetXaxis()->GetBinUpEdge(ibin) << endl;
       MCstat->SetBinError(ibin, 0.);
       MCtot->SetBinError(ibin, 0.);
