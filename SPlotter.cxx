@@ -848,6 +848,7 @@ void SPlotter::DrawSysError(SHist* stack)
   TH1* h = (TH1*) stack->GetStack()->GetStack()->At( stack->GetStack()->GetStack()->GetEntries()-1 );
   //TH1* e = (TH1*) h->Clone();
   TGraphAsymmErrors* eAsym = new TGraphAsymmErrors();
+
   for (Int_t i=1; i<h->GetNbinsX()+1; ++i){
     Double_t sys = 0; 
     if (m_syserr>0) sys = m_syserr*h->GetBinContent(i);
@@ -897,6 +898,7 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
   if (m_shapesys_arr.size()==0)//no systamtics given in theta file
     return err;
     
+  // loop over all background samples to find the process
   for (int i=0; i<stack->GetStack()->GetStack()->GetEntries(); ++i){  
     TH1* h = (TH1*) stack->GetStack()->GetHists()->At(i);
     TString histname = h->GetName(); //e.g. HT__QCD
@@ -905,6 +907,7 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
     TString variableName =  ((TObjString*)histnamePieces->At(0))-> GetString(); //this is the sample name e.g. HT
     TString sampleName =  ((TObjString*)histnamePieces->At(1))-> GetString(); //this is the sample name e.g. QCD or TTbar
     
+    // loop over all systematic error samples
     for (unsigned int syst = 0; syst < m_shapesys_arr.size(); ++syst){
       TObjArray* arr = m_shapesys_arr[syst];
       for (int nplots = 0; nplots < arr->GetEntries(); ++nplots){
@@ -914,19 +917,33 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
 
 	systFullName.ReplaceAll("__","#");
 	TObjArray* systFullNamePieces = systFullName.Tokenize("#");
-	TString systVariableName = hSys -> GetName();
+	TString systVariableName = hSys -> GetName();       
 
+	// continue if the channel of the systematic sample has the same name as the channel of the background process
 	if (variableName == systVariableName){
 	 
+	  // check if systematic uncertainty comes from the same sample as the background (e.g. ttbar)
 	  if (systFullNamePieces->Contains(sampleName)){
 	    absoluteerr = (hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin));
+	    
+	    // the second one contains the name of the uncertainty: check if the error should be reduced
+	    TString sysname = ((TObjString*) systFullNamePieces->At(1))->GetString();
 
-	    if ((sign == "plus" && absoluteerr >= 0.) ||(sign == "minus" && absoluteerr < 0.) ){
-	      squarederr += absoluteerr*absoluteerr;
-	   
+	    // loop over systematics that should be reduced, find the right factor
+	    for (Int_t j=0; j<m_ScaleSysUncName->GetEntries(); ++j){
+	      TString sysname_to_red = ((TObjString*) m_ScaleSysUncName->At(j))->GetString();
+	      if (sysname == sysname_to_red){		
+		absoluteerr *= m_sysweight.At(j);
+	      }
 	    }
+
+	    // this is strange: "plus" errors may lead to downward shifts of the cross section
+	    // don't include this 'if' condition
+	    //if ((sign == "plus" && absoluteerr >= 0.) ||(sign == "minus" && absoluteerr < 0.) ){
+	    squarederr += absoluteerr*absoluteerr;	   
+	    //}
 	  }	  
-	}	
+	}
       }
     }    
   }
@@ -952,6 +969,7 @@ void SPlotter::PlotRatios(vector<SHist*> hists, int ipad)
   int nh = ratios.size();
   for (int i=0; i<nh; ++i){
     SHist* rh = ratios[i];
+    rh->DrawNoErrorX(false);
     TString name = rh->GetName();
     if (name.Contains("_lx")) gPad->SetLogx(1);
     if (ndrawn==0) rh->Draw();
@@ -1047,7 +1065,7 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
 
     // set error to 0 for empty bins
     if (bIgnoreEmptyBins && val==0){
-      cout << "no MC in bin " << ibin << " lower = " << denom->GetXaxis()->GetBinLowEdge(ibin) << " upper = " << denom->GetXaxis()->GetBinUpEdge(ibin) << endl;
+      //cout << "no MC in bin " << ibin << " lower = " << denom->GetXaxis()->GetBinLowEdge(ibin) << " upper = " << denom->GetXaxis()->GetBinUpEdge(ibin) << endl;
       MCstat->SetBinError(ibin, 0.);
       MCtot->SetBinError(ibin, 0.);
       eAsym -> SetPointError(ibin, ex_low, ex_up, 0, 0); 

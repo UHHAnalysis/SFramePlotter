@@ -55,6 +55,12 @@ public:
     void SetLegStrings(const char* in);
     TObjArray* GetLegStrings();
 
+    void SetScaleSysUnc(const char* in);
+    TObjArray* GetScaleSysUnc();
+
+    void SetSysUncWeight(const char* in);
+    TArrayF GetSysUncWeight();
+
     void SetHistColors(const char* in);
     TArrayI GetHistColors();
    
@@ -145,6 +151,9 @@ private:
     TArrayI   fHistMarkers;       // the histogram markers
 
     TObjArray fLegStrings;        // legend entries
+
+    TObjArray fScaleSysUnc;       // names of systematic uncertainties to scale 
+    TArrayF fSysUncWeight;        // scaling factor for systematic uncertainties
  
     ClassDef(SteerPlotter,0)      // steering class for the SFrame Plotter
 

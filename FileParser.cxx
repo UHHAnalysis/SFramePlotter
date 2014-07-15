@@ -304,14 +304,14 @@ void FileParser::BrowseThetaFile(TString sample)
 	// histogram found
 	TH1* thist = (TH1*) obj;
 	if (m_do_cumulative) MakeCumulativeHist(thist);
-	//	TH1* rebinned = Rebin(thist, dirname);
+	TH1* rebinned = Rebin(thist, "");
 	SHist* shist = NULL;
-	//if (rebinned){
-	// shist = new SHist(rebinned);
-	//}
-	//else {
-	shist = new SHist(thist);
-	//	}
+	if (rebinned){
+	  shist = new SHist(rebinned);
+	}
+	else {
+	  shist = new SHist(thist);
+	}
 	TString proc_name = ((TObjString*)pieces->At(1))->GetString();
 	shist->SetProcessName(proc_name);
 	SetProcessName(proc_name);
@@ -326,7 +326,7 @@ void FileParser::BrowseThetaFile(TString sample)
 	  shist->SetProcessName(proc_name);	  
 	  SetProcessName(proc_name);
 	  if (debug) cout << "Adding hist to systematic sample: " << shist->GetHist()->GetName() 
-			  << " (process = " << m_process << ")" << endl;
+	  		  << " (process = " << m_process << ")" << endl;
 	} else {
 	  m_hists->Add(shist);
 	  if (debug) cout << "Adding hist " << shist->GetHist()->GetName() 
@@ -363,13 +363,47 @@ TH1* FileParser::Rebin(TH1* hist, TString dirname)
 {						
   TString name(hist->GetName());
   TString title(hist->GetTitle());
-  if (name.CompareTo("HT")==0){// && dirname.Contains("cutflow6") && title.Contains("electron")){
+  //cout << "name = " << name << " title = " << title << endl;
+  if (name.CompareTo("toptags")==0){// && dirname.Contains("cutflow6") && title.Contains("electron")){
    
     Double_t binsx[] = {0, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380, 1440, 1500, 1560, 1620, 1680, 1740, 1800, 1860, 1920, 1980, 2040, 2100, 2400, 3000};
     name.Append("_rebin_lx");
     TH1* rebinned = hist->Rebin(22, name, binsx);
     rebinned->SetTitle("HT [GeV]");
     return rebinned;
+
+  } else if (name.BeginsWith("mu_0top0btag_mttbar")) {
+    
+    TH1* rebinned = hist->Rebin(2);
+    return rebinned;
+
+  } else if (name.BeginsWith("mu_0top1btag_mttbar")) {
+    
+    TH1* rebinned = hist->Rebin(2);
+    return rebinned;
+
+  } else if (name.BeginsWith("mu_1top_mttbar")) {
+    
+    TH1* rebinned = hist->Rebin(4);
+    return rebinned;
+
+  } else if (name.BeginsWith("el_0top0btag_mttbar")) {
+    
+    TH1* rebinned = hist->Rebin(2);
+    return rebinned;
+
+  } else if (name.BeginsWith("el_0top1btag_mttbar")) {
+    
+    TH1* rebinned = hist->Rebin(2);
+    return rebinned;
+
+  } else if (name.BeginsWith("el_1top_mttbar")) {
+    
+    TH1* rebinned = hist->Rebin(4);
+    return rebinned;
+
+
+
   } else {
     return NULL;
   }

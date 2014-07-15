@@ -100,6 +100,22 @@ void SteerPlotter::Print(Option_t* opt) const
   } else {
       cout << "No stacking will be plotted." << endl;
   }
+  if (bPlotThetaFile){
+    if (fScaleSysUnc.GetEntries()>0){
+      cout << endl;
+      if (fScaleSysUnc.GetEntries() != fSysUncWeight.GetSize()){
+	cout << "Error: inconsistent number of entries in fScaleSysUnc and fSysUncWeight! Arrays must have same length, please correct steering." << endl;
+	exit(3);
+      }
+      cout << "Systematic errors will be scaled with these factors:" << endl;
+      for (Int_t i=0; i<fScaleSysUnc.GetEntries(); ++i){
+          TString name(((TObjString*) fScaleSysUnc.At(i))->GetName() );
+          cout << "    Name of systematic unc " << i << " = " << setw(15) << name << " scale with factor : " << fSysUncWeight.At(i) << endl;
+      }
+      
+    }
+  }
+
   if (bSubstractBkgd){
     cout << "Background will be substracted from sample 0: " << (((TObjString*) fSampleNames.At(0))->GetName() ) << endl;
   } else {
@@ -212,6 +228,12 @@ TArrayI SteerPlotter::GetHistMarkers(){return fHistMarkers;}
 
 void SteerPlotter::SetSamplesToStack(const char* in){ this->SplitString(in,",",&fSamplesToStack); fNumOfSamplesToStack = fSamplesToStack.GetEntries();}
 TObjArray* SteerPlotter::GetSamplesToStack(){return &fSamplesToStack;}
+
+void SteerPlotter::SetScaleSysUnc(const char* in){ this->SplitString(in,",",&fScaleSysUnc);}
+TObjArray* SteerPlotter::GetScaleSysUnc(){return &fScaleSysUnc;}
+
+void SteerPlotter::SetSysUncWeight(const char* in){ this->StringToArray(in, fSysUncWeight);}
+TArrayF SteerPlotter::GetSysUncWeight(){return fSysUncWeight;}
 
 void SteerPlotter::SetSamplesWeight(const char* in){ this->StringToArray(in, fSamplesWeight);}
 TArrayF SteerPlotter::GetSamplesWeight(){return fSamplesWeight;}

@@ -87,12 +87,18 @@ class SPlotter
   void SetLogy(Bool_t flag){bPlotLogy = flag;}
   void SetIgnoreEmptyBins(Bool_t flag){bIgnoreEmptyBins = flag;}
 
+  void SetScaleSysUnc(TObjArray* arr){m_ScaleSysUncName = arr;}
+  void SetSysUncWeight(TArrayF arr){m_sysweight = arr;}
+
  private:
 
   // do the stacking
   void StackHists(std::vector<TObjArray*>& hists, int index, bool rename=false);
 
   std::vector<TObjArray*> m_shapesys_arr;
+
+  TArrayF m_sysweight;
+  TObjArray* m_ScaleSysUncName; 
 
   TCanvas* m_can; 
   TPostScript* m_ps; 

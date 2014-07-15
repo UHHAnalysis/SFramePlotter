@@ -112,6 +112,9 @@ int main(int argc, char** argv)
   Bool_t Logy                = steerfile->GetLogy();
   Bool_t IgnoreEmptyBins     = steerfile->GetIgnoreEmptyBins();
 
+  TObjArray* ScaleSysUnc     = steerfile->GetScaleSysUnc();
+  TArrayF  SysUncWeight      = steerfile->GetSysUncWeight();
+
   // _______________ loop over files and get all histograms ______________
 
   FileParser fp;
@@ -182,6 +185,9 @@ int main(int argc, char** argv)
 
   if (ThetaFile){
     pl.SetShapeSysHists(harr_sys);
+
+    pl.SetScaleSysUnc(ScaleSysUnc);
+    pl.SetSysUncWeight(SysUncWeight);
   }
   
   // _______________ do the plotting ______________
