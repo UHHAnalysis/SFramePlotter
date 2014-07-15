@@ -897,6 +897,11 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
   double err = 0;
   if (m_shapesys_arr.size()==0)//no systamtics given in theta file
     return err;
+
+  if (sign!="plus" && sign!="minus"){
+    cout << "error in call to CalcShapeSysErrorForBinFromTheta: sign can only be 'plus' or 'minus', no systematic error will be calculated" << endl;
+    return err;
+  }
     
   // loop over all background samples to find the process
   for (int i=0; i<stack->GetStack()->GetStack()->GetEntries(); ++i){  
@@ -921,27 +926,30 @@ double SPlotter::CalcShapeSysErrorForBinFromTheta(SHist* stack, int ibin, TStrin
 
 	// continue if the channel of the systematic sample has the same name as the channel of the background process
 	if (variableName == systVariableName){
+
+	  // check if the the sign is the same as requested
+	  TString syssign = ((TObjString*) systFullNamePieces->At(2))->GetString();
+	  if (syssign == sign){
 	 
-	  // check if systematic uncertainty comes from the same sample as the background (e.g. ttbar)
-	  if (systFullNamePieces->Contains(sampleName)){
-	    absoluteerr = (hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin));
-	    
-	    // the second one contains the name of the uncertainty: check if the error should be reduced
-	    TString sysname = ((TObjString*) systFullNamePieces->At(1))->GetString();
-
-	    // loop over systematics that should be reduced, find the right factor
-	    for (Int_t j=0; j<m_ScaleSysUncName->GetEntries(); ++j){
-	      TString sysname_to_red = ((TObjString*) m_ScaleSysUncName->At(j))->GetString();
-	      if (sysname == sysname_to_red){		
-		absoluteerr *= m_sysweight.At(j);
+	    // check if systematic uncertainty comes from the same sample as the background (e.g. ttbar)
+	    if (systFullNamePieces->Contains(sampleName)){
+	      absoluteerr = (hSyst->GetBinContent(ibin))-(h->GetBinContent(ibin));
+	      
+	      // the second one contains the name of the uncertainty: check if the error should be reduced
+	      TString sysname = ((TObjString*) systFullNamePieces->At(1))->GetString();
+	      
+	      // loop over systematics that should be reduced, find the right factor
+	      for (Int_t j=0; j<m_ScaleSysUncName->GetEntries(); ++j){
+		TString sysname_to_red = ((TObjString*) m_ScaleSysUncName->At(j))->GetString();
+		if (sysname == sysname_to_red){		
+		  absoluteerr *= m_sysweight.At(j);
+		}
 	      }
+	      
+	      // got it: add to the total error in quadrature
+	      squarederr += absoluteerr*absoluteerr;	   
+	      
 	    }
-
-	    // this is strange: "plus" errors may lead to downward shifts of the cross section
-	    // don't include this 'if' condition
-	    //if ((sign == "plus" && absoluteerr >= 0.) ||(sign == "minus" && absoluteerr < 0.) ){
-	    squarederr += absoluteerr*absoluteerr;	   
-	    //}
 	  }	  
 	}
       }
@@ -1064,7 +1072,8 @@ vector<SHist*> SPlotter::CalcRatios(vector<SHist*> hists)
     eAsym -> SetPointError(ibin, ex_low, ex_up, ey_low, ey_up); 
 
     // set error to 0 for empty bins
-    if (bIgnoreEmptyBins && val==0){
+    //cout << "bIgnore = " << bIgnoreEmptyBins << " val = " << val << endl;
+    if (bIgnoreEmptyBins && val<0.01){
       //cout << "no MC in bin " << ibin << " lower = " << denom->GetXaxis()->GetBinLowEdge(ibin) << " upper = " << denom->GetXaxis()->GetBinUpEdge(ibin) << endl;
       MCstat->SetBinError(ibin, 0.);
       MCtot->SetBinError(ibin, 0.);

@@ -114,6 +114,7 @@ int main(int argc, char** argv)
 
   TObjArray* ScaleSysUnc     = steerfile->GetScaleSysUnc();
   TArrayF  SysUncWeight      = steerfile->GetSysUncWeight();
+  
 
   // _______________ loop over files and get all histograms ______________
 
