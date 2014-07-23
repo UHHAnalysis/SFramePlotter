@@ -145,6 +145,7 @@ void SPlotter::StackHists(std::vector<TObjArray*>& hists, int index, bool rename
       hist->SetName(histname + "__" + pname);
     }
     stack->GetStack()->Add(hist->GetHist());
+    stack->GetStack()->SetTitle(hist->GetHist()->GetTitle());
     hist->SetIsUsedInStack(true);
     hist->SetDoDraw(false);
     stack->SetUnc(hist->GetUnc(), stack->GetStack()->GetHists()->GetSize()-1);
@@ -557,6 +558,7 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
 	OpenPostscript(dir);
 	current_dir = dir;
 	iplot = 1;
+	ipad = 1;
 	bleg = true;
       }
 
@@ -592,7 +594,7 @@ void SPlotter::ProcessAndPlot(std::vector<TObjArray*> histarr)
       PlotLumiYield(hists[0], ipad);
 
     } else { // usual plots
-
+      
       PlotHists(hists, ipad);
       // draw a legend     
       if (bleg){
@@ -813,6 +815,8 @@ void SPlotter::PlotHists(vector<SHist*> hists, int ipad)
   if (sstack){
     if (ndrawn==0){
       sstack->Draw();
+      StackCosmetics(sstack->GetStack());
+      gPad->Update();
       need_update = false;    
     } else {
       sstack->Draw("same");
@@ -1668,6 +1672,32 @@ void SPlotter::GeneralCosmetics(TH1* hist)
   
   // set X-axis title
   hist->GetXaxis()->SetTitle(hist->GetTitle()); 
+
+  hist->SetTitle("");
+
+  if (bShapeNorm) {
+    hist->GetYaxis()->SetTitle("#DeltaN/N");
+  }
+
+  hist->GetXaxis()->SetTitleFont(42);
+  hist->GetXaxis()->SetLabelFont(42);
+  hist->GetYaxis()->SetTitleFont(42);
+  hist->GetYaxis()->SetLabelFont(42);
+
+}
+
+void SPlotter::StackCosmetics(THStack* hist)
+{
+  
+  // set Y-axis title
+  hist->GetYaxis()->SetTitle("Events"); 
+  hist->GetYaxis()->SetTitleOffset(1.0);  
+  hist->GetYaxis()->SetTitleSize(0.06);  
+  
+  // set X-axis title
+  hist->GetXaxis()->SetTitle(hist->GetTitle()); 
+  hist->GetXaxis()->SetTitleOffset(1.0);  
+  hist->GetXaxis()->SetTitleSize(0.06);  
 
   hist->SetTitle("");
 

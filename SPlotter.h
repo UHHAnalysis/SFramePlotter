@@ -53,6 +53,7 @@ class SPlotter
   // cosmetics
   void DoCosmetics(std::vector<SHist*> hists);
   void GeneralCosmetics(TH1* hist);
+  void StackCosmetics(THStack* hist);
   void PortraitCosmetics(TH1* hist);
   void LandscapeCosmetics(TH1* hist);
   void YieldCosmetics(TH1* hist);
