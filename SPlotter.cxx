@@ -1387,14 +1387,12 @@ void SPlotter::DrawLegend(vector<SHist*> hists)
 
 void SPlotter::DrawLumi()
 {
-  TString infotext = TString::Format("%3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
-  if (bForPrelim) infotext = TString::Format("CMS Preliminary, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
-  if (bForPublication) infotext = TString::Format("CMS, %3.1f fb^{-1} at #sqrt{s} = 8 TeV", m_lumi);
+  TString infotext = TString::Format("%3.1f fb^{-1} (8 TeV)", m_lumi);
   TLatex *text1 = new TLatex(3.5, 24, infotext);
   text1->SetNDC();
   text1->SetTextAlign(33);
-  text1->SetX(0.9);
-  text1->SetTextFont(62);
+  text1->SetX(0.95);
+  text1->SetTextFont(42);
   if (bPlotRatio){ 
     text1->SetTextSize(0.06);
     text1->SetY(1.);
@@ -1403,6 +1401,40 @@ void SPlotter::DrawLumi()
     text1->SetY(1.);
   }
   text1->Draw();
+
+  if (bForPublication || bForPrelim){
+    TString cmstext = "CMS";
+    TLatex *text2 = new TLatex(3.5, 24, cmstext);
+    text2->SetNDC();
+    text2->SetTextAlign(13);
+    text2->SetX(0.24);
+    text2->SetTextFont(62);
+    if (bPlotRatio){ 
+      text2->SetTextSize(0.08);
+      text2->SetY(0.87);
+    } else {
+      text2->SetTextSize(0.05);
+      text2->SetY(0.87);
+    }
+    text2->Draw();
+  }
+
+  if (bForPrelim){
+    TString preltext = "Preliminary";
+    TLatex *text3 = new TLatex(3.5, 24, preltext);
+    text3->SetNDC();
+    text3->SetTextAlign(13);
+    text3->SetX(0.24);
+    text3->SetTextFont(52);
+    if (bPlotRatio){ 
+      text3->SetTextSize(0.06);
+      text3->SetY(0.78);
+    } else {
+      text3->SetTextSize(0.035);
+      text3->SetY(0.78);
+    }
+    text3->Draw();
+  }
   
 }
 
